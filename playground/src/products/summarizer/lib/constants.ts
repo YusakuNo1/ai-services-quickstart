@@ -13,28 +13,16 @@ export const OUTPUT_FORMAT_OPTIONS = [
 ] as const
 
 export const LANGUAGE_OPTIONS = [
-    { value: 'ar-ae', label: 'Arabic (UAE)' },
-    { value: 'ar-eg', label: 'Arabic (Egypt)' },
-    { value: 'ar-sa', label: 'Arabic (Saudi Arabia)' },
-    { value: 'de-de', label: 'German (Germany)' },
-    { value: 'en-au', label: 'English (Australia)' },
-    { value: 'en-gb', label: 'English (UK)' },
-    { value: 'en-in', label: 'English (India)' },
-    { value: 'en-nz', label: 'English (New Zealand)' },
     { value: 'en-us', label: 'English (US)' },
-    { value: 'es-es', label: 'Spanish (Spain)' },
-    { value: 'es-mx', label: 'Spanish (Mexico)' },
-    { value: 'es-us', label: 'Spanish (US)' },
-    { value: 'fr-ca', label: 'French (Canada)' },
-    { value: 'fr-fr', label: 'French (France)' },
-    { value: 'it-it', label: 'Italian (Italy)' },
-    { value: 'ja-jp', label: 'Japanese (Japan)' },
-    { value: 'pt-br', label: 'Portuguese (Brazil)' },
-    { value: 'pt-pt', label: 'Portuguese (Portugal)' },
-    { value: 'zh-cn', label: 'Chinese (China)' },
-    { value: 'zh-hans', label: 'Chinese (Simplified Script)' },
-    { value: 'zh-hant', label: 'Chinese (Traditional Script)' },
-    { value: 'zh-tw', label: 'Chinese (Taiwan)' },
+    { value: 'zh-cn', label: 'Chinese (Simplified)' },
+    { value: 'ja-jp', label: 'Japanese' },
+    { value: 'es-es', label: 'Spanish' },
+    { value: 'fr-fr', label: 'French' },
+    { value: 'de-de', label: 'German' },
+    { value: 'pt-br', label: 'Portuguese' },
+    { value: 'it-it', label: 'Italian' },
+    { value: 'ar-sa', label: 'Arabic (Saudi Arabia)' },
+    { value: 'ar-ae', label: 'Arabic (UAE)' },
 ] as const
 
 export type SummarizerTask = typeof TASK_OPTIONS[number]['value']

@@ -1,15 +1,18 @@
 # Zoom AI Services Quickstart
 
-A Node.js/Express + React playground for the [Zoom AI Services APIs](https://developers.zoom.us/docs/ai-services/). Test **Scribe** (speech-to-text) and **Translation** through a web UI backed by a tRPC server that handles JWT authentication and all API communication.
-! [screenshot](https://github.com/user-attachments/assets/6c99d0b4-f5bb-4cd0-8cca-f7a6bfleb50e)
+A Node.js/Express + React playground for the [Zoom AI Services APIs](https://developers.zoom.us/docs/ai-services/). Test **Scribe** (speech-to-text), **Translator**, and **Summarizer** through a web UI backed by a tRPC server that handles JWT authentication and all API communication.
+![screenshot of the playground](https://github.com/user-attachments/assets/92ce3a67-b9c1-4709-9c37-e0396e2ea249)
+
 ## Products
 
 | Product | Modes | Description |
 |---|---|---|
 | **Scribe** | Fast (Sync) | Upload or record audio/video, get a transcript immediately |
 | **Scribe** | Batch | Process thousands of S3 files; auto-splits jobs >1,000 files |
-| **Translation** | Fast (Sync) | Translate up to 4,000 characters across up to 12 target languages |
-| **Translation** | Batch | Translate `.txt` files stored in S3 |
+| **Translator** | Fast (Sync) | Translate up to 4,000 characters into one of 9 supported languages |
+| **Translator** | Batch | Translate `.txt` files stored in S3 |
+| **Summarizer** | Fast (Sync) | Summarize a transcript (up to 96 KB) — recap, action items, summary, or full summary |
+| **Summarizer** | Batch | Summarize transcripts stored in S3 |
 
 ## Architecture
 
@@ -45,16 +48,14 @@ Edit `.env`:
 | `ZOOM_API_SECRET` | **Yes** | Zoom Build Platform API secret |
 | `PORT` | No | Server port (default: `4000`) |
 
-For **batch jobs** (Scribe or Translation), also set:
+For **batch jobs** also set:
 
 | Variable | Description |
 |---|---|
-| `AWS_ACCESS_KEY_ID` | IAM access key |
+| `AWS_ACCESS_KEY_ID` | IAM access key — forwarded to Zoom to read/write your S3 bucket |
 | `AWS_SECRET_ACCESS_KEY` | IAM secret key |
 | `AWS_SESSION_TOKEN` | Session token (if using temporary credentials) |
-| `AWS_REGION` | Region of your S3 bucket (default: `us-east-1`) |
-| `WEBHOOK_URL` | Public HTTPS URL for job status notifications |
-| `WEBHOOK_SECRET` | HMAC secret to verify webhook payloads |
+| `WEBHOOK_SECRET` | HMAC secret to verify incoming webhook payloads |
 
 Use `scripts/generate-sts-creds.sh` to generate temporary STS credentials:
 ```bash
@@ -75,24 +76,18 @@ Open `http://localhost:5173`.
 
 ## Webhooks
 
-`POST /webhooks/scribe` receives Zoom batch job notifications. Requires a publicly reachable HTTPS URL — use [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/) for local development:
+The server exposes three webhook endpoints for Zoom batch job notifications: `POST /webhooks/scribe`, `POST /webhooks/translator`, and `POST /webhooks/summarizer`. All three require a publicly reachable HTTPS URL — use [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/) for local development:
 
 ```bash
 cloudflared tunnel --url http://localhost:4000
 ```
 
-Set the printed URL as `WEBHOOK_URL` in `.env`.
-
-## Adding a product
-
-The playground uses a product registry (`playground/src/products.ts`). To add a new product:
-
-1. Create `playground/src/products/<name>/tabs/MyTab.tsx`
-2. Add a tRPC router in `src/routers/<name>.ts` and register it in `src/routers/index.ts`
-3. Import and push one entry to `PRODUCTS` in `products.ts`
+Paste the printed URL into the **Webhook URL** field when submitting a batch job in the playground. Set `WEBHOOK_SECRET` in `.env` to the same value you submit alongside it — the server uses it to verify the `x-zm-signature` header on incoming callbacks.
 
 ## Resources
 
 - [Zoom AI Scribe documentation](https://developers.zoom.us/docs/ai-services/scribe)
+- [Zoom AI Translator documentation](https://developers.zoom.us/docs/ai-services/translator)
+- [Zoom AI Summarizer documentation](https://developers.zoom.us/docs/ai-services/summarizer)
 - [API Reference](https://developers.zoom.us/docs/api/ai-services/)
 - [Developer Support](https://devsupport.zoom.us) · [Developer Forum](https://devforum.zoom.us)

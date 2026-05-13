@@ -3,12 +3,11 @@ node_modules
 .env
 .env.local
 .env.*.local
-OpenAPI_export.json
 .DS_Store
 *.log
 *.swp
 *.swo
 bun.lock
 dist
-src/*.js
-src/*.js.map
+playground/dist
+OpenAPI_export.json
