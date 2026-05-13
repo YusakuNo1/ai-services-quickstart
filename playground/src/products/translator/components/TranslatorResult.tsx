@@ -29,6 +29,7 @@ export function TranslatorResult({ result }: Props) {
     const empty = result === null
 
     const data = (!loading && !empty) ? result as TranslatorFastResponse : null
+    const errorMessage = typeof data?.error === 'string' ? data.error : null
     const translationMap = (data?.translations && !Array.isArray(data.translations) ? data.translations as unknown as TranslationMap : undefined)
         ?? data?.result?.translations
         ?? data?.translations_map
@@ -49,7 +50,7 @@ export function TranslatorResult({ result }: Props) {
     return (
         <div className="mb-4 rounded-xl border border-gray-200 overflow-hidden">
             <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-200 bg-gray-50">
-                <div className={`w-2 h-2 rounded-full transition-colors ${loading ? 'bg-yellow-500 animate-pulse' : hasResult ? 'bg-emerald-500' : 'bg-gray-300'}`} />
+                <div className={`w-2 h-2 rounded-full transition-colors ${loading ? 'bg-yellow-500 animate-pulse' : errorMessage ? 'bg-red-500' : hasResult ? 'bg-emerald-500' : 'bg-gray-300'}`} />
                 <span className="text-xs font-medium text-gray-500">Translation</span>
                 {sourceLang && (
                     <span className="ml-auto text-[10px] text-gray-400 font-mono">
@@ -65,6 +66,8 @@ export function TranslatorResult({ result }: Props) {
             <div className="bg-zoom-surface min-h-32">
                 {loading ? (
                     <p className="p-4 text-xs text-gray-400 animate-pulse font-mono">Waiting for response...</p>
+                ) : errorMessage ? (
+                    <p className="p-4 text-xs font-mono text-red-600 whitespace-pre-wrap">{errorMessage}</p>
                 ) : !hasResult ? (
                     <p className="p-4 text-xs text-gray-300 select-none font-mono">Translation will appear here...</p>
                 ) : (

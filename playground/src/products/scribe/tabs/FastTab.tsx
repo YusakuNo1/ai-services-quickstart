@@ -109,7 +109,9 @@ export function FastTab() {
 
     const canSubmit = inputMode === 'record' ? !!recordedBlob : true
     const busy = transcribeMutation.isPending
-    const result = busy ? 'loading' : (transcribeMutation.data ?? transcribeMutation.error ? { error: transcribeMutation.error?.message } : null)
+    const result = busy
+        ? 'loading'
+        : (transcribeMutation.data ?? (transcribeMutation.error ? { error: transcribeMutation.error.message } : null))
 
     return (
         <div className="lg:grid lg:grid-cols-[3fr_2fr] lg:items-start gap-5">

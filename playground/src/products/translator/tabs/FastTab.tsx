@@ -22,6 +22,7 @@ export function FastTab() {
     }
 
     const busy = translateMutation.isPending
+    const response = translateMutation.data ?? (translateMutation.error ? { error: translateMutation.error.message } : null)
 
     return (
         <div className="lg:grid lg:grid-cols-[3fr_2fr] lg:items-start gap-5">
@@ -78,8 +79,8 @@ export function FastTab() {
                     {busy && <Spinner />}
                     {busy ? 'Translating...' : '▶ Translate'}
                 </button>
-                <TranslatorResult result={busy ? 'loading' : translateMutation.data ?? null} />
-                <JsonResult data={busy ? null : (translateMutation.data ?? null)} loading={busy} />
+                <TranslatorResult result={busy ? 'loading' : response} />
+                <JsonResult data={busy ? null : response} loading={busy} />
             </div>
         </div>
     )
