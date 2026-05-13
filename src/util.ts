@@ -2,45 +2,21 @@ import { KJUR } from 'jsrsasign'
 import dotenv from 'dotenv'
 dotenv.config()
 
-type AwsCredentials = {
+export type AwsCredentials = {
     access_key_id?: string
     secret_access_key?: string
     session_token?: string
 }
 
-type BatchInput = {
-    source?: string
-    mode?: string
-    uri?: string
-    manifest?: string[]
-    filters?: { include_globs?: string[]; exclude_globs?: string[] }
-    auth?: { aws?: AwsCredentials }
-}
-
-type BatchOutput = {
-    destination?: string
-    uri?: string
-    layout?: string
-    overwrite?: boolean
-    auth?: { aws?: AwsCredentials }
-}
-
-type BatchJobRequest = {
-    input?: BatchInput
-    output?: BatchOutput
-    config?: Record<string, unknown>
-    reference_id?: string
-    notifications?: { webhook_url?: string; secret?: string }
-}
-
 const ZOOM_API_KEY = process.env.ZOOM_API_KEY
 const ZOOM_API_SECRET = process.env.ZOOM_API_SECRET
+export const ZOOM_API_BASE_URL = 'https://api.zoom.us/v2/'
 
 if (!ZOOM_API_KEY || !ZOOM_API_SECRET) {
     throw new Error('ZOOM_API_KEY and ZOOM_API_SECRET are required')
 }
 
-const generateJWT = () => {
+export const generateJWT = () => {
     const now = Math.round(Date.now() / 1000)
     const iat = now - 30
     const exp = iat + 60 * 60 * 2
@@ -56,7 +32,7 @@ const generateJWT = () => {
     return API_JWT
 }
 
-function getEnvAwsCredentials(): AwsCredentials | undefined {
+export function getEnvAwsCredentials(): AwsCredentials | undefined {
     if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) return undefined
     return {
         access_key_id: process.env.AWS_ACCESS_KEY_ID,
@@ -65,15 +41,21 @@ function getEnvAwsCredentials(): AwsCredentials | undefined {
     }
 }
 
-function isS3(value?: string): boolean {
+export function isS3(value?: string): boolean {
     return String(value ?? '').toLowerCase() === 's3'
 }
 
-function withAwsAuth<T extends { auth?: { aws?: AwsCredentials } }>(value: T | undefined, aws: AwsCredentials | undefined): T | undefined {
+export function withAwsAuth<T extends { auth?: { aws?: AwsCredentials } }>(value: T | undefined, aws: AwsCredentials | undefined): T | undefined {
     if (!value) return undefined
     if (!aws) return value
     return { ...value, auth: { ...(value.auth ?? {}), aws } }
 }
 
-
-export { generateJWT, getEnvAwsCredentials, isS3, withAwsAuth, BatchJobRequest, BatchInput, BatchOutput, AwsCredentials }
+export function createApiRequest(basePath: string) {
+    return async function makeRequest(path: string, init?: RequestInit) {
+        const res = await fetch(`${basePath}${path}`, { ...init, headers: { Authorization: `Bearer ${generateJWT()}`, ...init?.headers } })
+        if (!res.ok) throw new Error(await res.text() || res.statusText)
+        if (res.status === 204) return null
+        return res.json()
+    }
+}

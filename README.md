@@ -1,98 +1,97 @@
-# Zoom AI Scribe API Quickstart
+# Zoom AI Services Quickstart
 
-A Node.js/Express server for the [Zoom AI Scribe API](https://developers.zoom.us/docs/ai-services/scribe/) for speech-to-text transcription. It handles JWT authentication and exposes simple REST endpoints for **fast mode** (with file upload) and **batch jobs** (S3-based). Use the Vite playground to test the API with a web UI.
+A Node.js/Express + React playground for the [Zoom AI Services APIs](https://developers.zoom.us/docs/ai-services/). Test **Scribe** (speech-to-text) and **Translation** through a web UI backed by a tRPC server that handles JWT authentication and all API communication.
+! [screenshot](https://github.com/user-attachments/assets/6c99d0b4-f5bb-4cd0-8cca-f7a6bfleb50e)
+## Products
 
-![screenshot](https://github.com/user-attachments/assets/6c99d0b4-f5bb-4cd0-8cca-f7a6bf1eb50e)
+| Product | Modes | Description |
+|---|---|---|
+| **Scribe** | Fast (Sync) | Upload or record audio/video, get a transcript immediately |
+| **Scribe** | Batch | Process thousands of S3 files; auto-splits jobs >1,000 files |
+| **Translation** | Fast (Sync) | Translate up to 4,000 characters across up to 12 target languages |
+| **Translation** | Batch | Translate `.txt` files stored in S3 |
 
-## Features
+## Architecture
 
-- **Sync transcription** — `POST /transcribe` with an audio/video file, returns transcript in the response.
-- **Batch jobs** — Create, list, get, and delete Scribe batch jobs using S3 input/output buckets.
-- **Webhooks** — `POST /webhooks/scribe` endpoint to receive job status notifications.
+```
+playground/          Vite + React + tRPC client (port 5173)
+    └── /trpc  ──▶  Express + tRPC server (port 4000)
+                        ├── Zoom AI Services API
+                        └── AWS S3 (for batch jobs)
+```
+
+The playground proxies `/trpc` to the Express server. All Zoom API calls happen server-side; the browser never touches Zoom credentials.
 
 ## Prerequisites
 
-- A Zoom developer account for the Build platform
-- For batch: IAM credentials to access an S3 bucket
-- Node.js v24+
+- [Zoom Build Platform](https://developers.zoom.us/docs/ai-services/build-platform/) credentials
+- Node.js 24+
+- For batch jobs: an AWS account with an S3 bucket and IAM credentials
 
-## Installation
+## Setup
 
 ```bash
 git clone https://github.com/zoom/scribe-quickstart.git
 cd scribe-quickstart
 npm install
+cp .env.example .env
 ```
 
-## Setup
+Edit `.env`:
 
-1. Copy environment variables and add your [Zoom Build Platform](https://developers.zoom.us/docs/ai-services/build-platform/) and [AWS Security Token Service](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html) credentials:
+| Variable | Required | Description |
+|---|---|---|
+| `ZOOM_API_KEY` | **Yes** | Zoom Build Platform API key |
+| `ZOOM_API_SECRET` | **Yes** | Zoom Build Platform API secret |
+| `PORT` | No | Server port (default: `4000`) |
 
-   ```bash
-   cp .env.example .env
-   ```
+For **batch jobs** (Scribe or Translation), also set:
 
-You can use `scripts/generate-sts-creds.sh` to generate temporary AWS STS credentials using your IAM access key and secret key if you have the aws cli installed:
+| Variable | Description |
+|---|---|
+| `AWS_ACCESS_KEY_ID` | IAM access key |
+| `AWS_SECRET_ACCESS_KEY` | IAM secret key |
+| `AWS_SESSION_TOKEN` | Session token (if using temporary credentials) |
+| `AWS_REGION` | Region of your S3 bucket (default: `us-east-1`) |
+| `WEBHOOK_URL` | Public HTTPS URL for job status notifications |
+| `WEBHOOK_SECRET` | HMAC secret to verify webhook payloads |
 
+Use `scripts/generate-sts-creds.sh` to generate temporary STS credentials:
 ```bash
 ./scripts/generate-sts-creds.sh <AWS_ACCESS_KEY_ID> <AWS_SECRET_ACCESS_KEY>
 ```
 
-This will generate a temporary AWS STS credentials and write them to the `.env` file.
+## Running
 
-2. Edit `.env` and set at minimum:
+```bash
+# Terminal 1 — API server
+npm start
 
-   | Variable          | Required | Description                                       |
-   | ----------------- | -------- | ------------------------------------------------- |
-   | `ZOOM_API_KEY`    | **Yes**  | Zoom Build platform API key                       |
-   | `ZOOM_API_SECRET` | **Yes**  | Zoom Build platform API secret                    |
-   | `PORT`            | No       | Server port (default: `4000`)                     |
-   | `LANGUAGE`        | No       | Default transcription language (default: `en-US`) |
+# Terminal 2 — Playground UI
+cd playground && npm install && npm run dev
+```
 
-   For **batch jobs** you must also set:
+Open `http://localhost:5173`.
 
-   | Variable                | Required for batch  | Description                                  |
-   | ----------------------- | ------------------- | -------------------------------------------- |
-   | `S3_INPUT_URI`          | Yes                 | S3 URI for input files (e.g. `s3://bucket/`) |
-   | `S3_OUTPUT_URI`         | Yes                 | S3 URI for output transcripts                |
-   | `AWS_ACCESS_KEY_ID`     | Yes                 | AWS credentials for Scribe                   |
-   | `AWS_SECRET_ACCESS_KEY` | Yes                 | AWS credentials for Scribe                   |
-   | `AWS_SESSION_TOKEN`     | Yes (if using temp) | AWS session token                            |
+## Webhooks
 
-   Optional:
+`POST /webhooks/scribe` receives Zoom batch job notifications. Requires a publicly reachable HTTPS URL — use [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/) for local development:
 
-   | Variable         | Description                       |
-   | ---------------- | --------------------------------- |
-   | `WEBHOOK_URL`    | URL for batch job status webhooks |
-   | `WEBHOOK_SECRET` | Secret to verify webhook payloads |
+```bash
+cloudflared tunnel --url http://localhost:4000
+```
 
-3. Start the server:
+Set the printed URL as `WEBHOOK_URL` in `.env`.
 
-   ```bash
-   npm start
-   ```
+## Adding a product
 
-   The server runs at `http://localhost:4000` (or your `PORT`).
+The playground uses a product registry (`playground/src/products.ts`). To add a new product:
 
-## Playground
+1. Create `playground/src/products/<name>/tabs/MyTab.tsx`
+2. Add a tRPC router in `src/routers/<name>.ts` and register it in `src/routers/index.ts`
+3. Import and push one entry to `PRODUCTS` in `products.ts`
 
-A small web UI is provided to try transcription and batch jobs.
-
-1. Start the API server (from the project root):
-
-   ```bash
-   npm run start
-   ```
-
-2. In another terminal, run the playground:
-
-   ```bash
-   cd playground && npm install && npm run dev
-   ```
-
-3. Open the URL shown by Vite (e.g. `http://localhost:5173`). If the API runs on a different origin, set the `API` base URL in `playground/src/shared.ts` (e.g. `export const API = 'http://localhost:4000'`) or use a Vite proxy to the API.
-
-## Need help?
+## Resources
 
 - [Zoom AI Scribe documentation](https://developers.zoom.us/docs/ai-services/scribe)
 - [API Reference](https://developers.zoom.us/docs/api/ai-services/)

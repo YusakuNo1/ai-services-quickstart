@@ -18,11 +18,5 @@ services:
         sync: false
       - key: AWS_SESSION_TOKEN
         sync: false
-      - key: S3_INPUT_URI
-        sync: false
-      - key: S3_OUTPUT_URI
-        sync: false
-      - key: WEBHOOK_URL
-        sync: false
       - key: WEBHOOK_SECRET
         sync: false

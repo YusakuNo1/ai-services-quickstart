@@ -1,0 +1,65 @@
+import { type RefObject } from 'react'
+
+interface Props {
+    dragging: boolean
+    setDragging: (v: boolean) => void
+    fileName: string | null
+    fileRef: RefObject<HTMLInputElement | null>
+    audioUrl: string | null
+    onFile: (file: File | undefined) => void
+}
+
+export function AudioUploadZone({ dragging, setDragging, fileName, fileRef, audioUrl, onFile }: Props) {
+    return (
+        <>
+            <div
+                className={[
+                    'relative rounded-lg border-2 border-dashed transition-all duration-200 cursor-pointer',
+                    dragging ? 'border-zoom-blue bg-zoom-blue/5' : 'border-gray-300 hover:border-gray-400 bg-gray-50',
+                ].join(' ')}
+                onDragOver={e => { e.preventDefault(); setDragging(true) }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={e => {
+                    e.preventDefault()
+                    setDragging(false)
+                    const file = e.dataTransfer.files[0]
+                    if (file && fileRef.current) {
+                        const dt = new DataTransfer()
+                        dt.items.add(file)
+                        fileRef.current.files = dt.files
+                        onFile(file)
+                    }
+                }}
+                onClick={() => fileRef.current?.click()}
+            >
+                <input
+                    ref={fileRef}
+                    type="file"
+                    accept="audio/*,video/*"
+                    required
+                    className="sr-only"
+                    onChange={e => onFile(e.target.files?.[0])}
+                />
+                <div className="flex flex-col items-center gap-2 py-8 px-4 text-center">
+                    {fileName ? (
+                        <>
+                            <div className="w-10 h-10 rounded-full bg-zoom-blue/10 flex items-center justify-center text-zoom-blue">&#9835;</div>
+                            <span className="text-sm font-medium text-gray-700">{fileName}</span>
+                            <span className="text-xs text-gray-500">Click to change file</span>
+                        </>
+                    ) : (
+                        <>
+                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">&uarr;</div>
+                            <span className="text-sm text-gray-500">Drop audio file here or <span className="text-zoom-blue font-medium">browse</span></span>
+                            <span className="text-xs text-gray-500">wav &middot; mp3 &middot; m4a &middot; flac &middot; ogg &middot; webm &middot; mp4 &middot; mov &mdash; max 100 MB</span>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            {audioUrl && (
+                <audio src={audioUrl} controls className="mt-3 w-full rounded-lg h-10" />
+            )}
+        </>
+    )
+}

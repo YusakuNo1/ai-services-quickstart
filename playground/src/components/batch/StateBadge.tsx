@@ -1,4 +1,4 @@
-import { STATE_META } from './types'
+import { STATE_META } from './stateMeta'
 
 export function StateBadge({ state }: { state: string }) {
     const meta = STATE_META[state] ?? { color: 'bg-gray-50 text-gray-600 border-gray-200', dot: 'bg-gray-400' }

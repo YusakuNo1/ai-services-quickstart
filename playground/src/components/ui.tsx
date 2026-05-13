@@ -48,7 +48,7 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
     return (
         <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-gray-500 uppercase tracking-widest">{label}</label>
-            <p className="text-xs text-gray-500 leading-relaxed min-h-4">{hint ?? ''}</p>
+            <p className="text-xs text-gray-500 leading-relaxed min-h-4">{hint}</p>
             {children}
         </div>
     )

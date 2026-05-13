@@ -36,3 +36,8 @@
 *::-webkit-scrollbar-corner {
     background: transparent;
 }
+
+@keyframes barPulse {
+    0% { height: 4px; opacity: 0.4; }
+    100% { height: 28px; opacity: 1; }
+}

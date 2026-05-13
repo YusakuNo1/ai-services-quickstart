@@ -2,8 +2,10 @@ import { colorizeJson } from '../lib/colorizeJson'
 
 export function JsonResult({ data, loading }: { data: unknown; loading?: boolean }) {
     const isEmpty = data === null && !loading
-    const json = isEmpty ? '' : JSON.stringify(data, null, 2)
     const isError = data && typeof data === 'object' && 'error' in (data as object)
+
+    const json = isEmpty ? '' : JSON.stringify(data, null, 2)
+    const colorized = colorizeJson(json)
 
     return (
         <div className={`rounded-xl border overflow-hidden transition-all duration-300 h-full flex flex-col ${isError ? 'border-red-300' : 'border-gray-200'}`}>
@@ -27,7 +29,7 @@ export function JsonResult({ data, loading }: { data: unknown; loading?: boolean
                     ? <span className="text-gray-400 animate-pulse">Waiting for response…</span>
                     : isEmpty
                         ? <span className="text-gray-300 select-none">Response will appear here…</span>
-                        : colorizeJson(json)
+                        : colorized
                 }
             </pre>
         </div>

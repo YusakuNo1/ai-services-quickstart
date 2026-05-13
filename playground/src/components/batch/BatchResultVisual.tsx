@@ -1,14 +1,41 @@
-import { KV } from './KV'
-import { StateBadge } from './StateBadge'
+import { KV } from '../../products/scribe/components/batch/KV'
 import {
     type BatchApiResponse,
     type CancelResponse,
     isErrorResponse,
     isFilesResponse,
     isJobResponse,
-} from './types'
+    isMultiJobResponse,
+} from '../../lib/batchTypes'
+import { StateBadge } from './StateBadge'
 
 export function BatchResultVisual({ data }: { data: BatchApiResponse }) {
+    if (isMultiJobResponse(data)) {
+        return (
+            <div className="flex flex-col gap-3">
+                <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+                    {data.jobs.length} Jobs Submitted
+                </span>
+                <div className="flex flex-col gap-1.5">
+                    {data.jobs.map((job, i) => (
+                        'error' in job ? (
+                            <div key={`error-${i}`} className="flex items-center gap-2.5 py-1.5 px-2.5 rounded-lg bg-red-50 border border-red-200">
+                                <span className="text-[10px] text-red-400 tabular-nums w-4 text-right">{i + 1}</span>
+                                <span className="font-mono text-xs text-red-700 flex-1 break-all">{job.error}</span>
+                            </div>
+                        ) : (
+                            <div key={job.job_id} className="flex items-center gap-2.5 py-1.5 px-2.5 rounded-lg bg-gray-50 border border-gray-200">
+                                <span className="text-[10px] text-gray-400 tabular-nums w-4 text-right">{i + 1}</span>
+                                <span className="font-mono text-xs text-gray-700 flex-1 truncate">{job.job_id}</span>
+                                <StateBadge state={job.state} />
+                            </div>
+                        )
+                    ))}
+                </div>
+            </div>
+        )
+    }
+
     if (isErrorResponse(data)) {
         const err = data.error
         const errStr = typeof err === 'string' ? err : (err.message ?? JSON.stringify(err))
@@ -57,7 +84,7 @@ export function BatchResultVisual({ data }: { data: BatchApiResponse }) {
                                                 {errMsg && <p className="text-[10px] text-red-500 mt-0.5 leading-snug truncate" title={errMsg}>{errMsg}</p>}
                                             </td>
                                             <td className="py-2 px-2 whitespace-nowrap"><StateBadge state={f.state} /></td>
-                                            <td className="py-2 px-2 text-gray-500 whitespace-nowrap">{f.duration_sec > 0 ? `${f.duration_sec}s` : '—'}</td>
+                                            <td className="py-2 px-2 text-gray-500 whitespace-nowrap">{f.duration_sec ? `${f.duration_sec}s` : '—'}</td>
                                         </tr>
                                     )
                                 })}
@@ -117,9 +144,11 @@ export function BatchResultVisual({ data }: { data: BatchApiResponse }) {
                     <div className="rounded-lg bg-gray-50 border border-gray-200 p-3">
                         <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Config</p>
                         <div className="grid grid-cols-2 gap-2">
-                            {(Object.entries(config) as [string, string | number | boolean][]).map(([k, v]) => (
-                                <KV key={k} label={k.replace(/_/g, ' ')} value={String(v)} />
-                            ))}
+                            {(Object.entries(config) as [string, unknown][])
+                                .filter(([, v]) => v !== null && typeof v !== 'object')
+                                .map(([k, v]) => (
+                                    <KV key={k} label={k.replace(/_/g, ' ')} value={String(v)} />
+                                ))}
                         </div>
                     </div>
                 )}

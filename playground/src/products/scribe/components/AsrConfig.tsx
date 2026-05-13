@@ -1,6 +1,6 @@
 import type { AsrConfig } from '../lib/constants'
-import { inputCls } from '../lib/constants'
-import { Field, ToggleRow } from './ui'
+import { inputCls } from '../../../lib/constants'
+import { Field, ToggleRow } from '../../../components/ui'
 
 export function AsrConfigForm({ value, onChange }: { value: AsrConfig; onChange: (v: AsrConfig) => void }) {
     const set = <K extends keyof AsrConfig>(k: K, v: AsrConfig[K]) => onChange({ ...value, [k]: v })
@@ -12,12 +12,6 @@ export function AsrConfigForm({ value, onChange }: { value: AsrConfig; onChange:
                 </Field>
                 <ToggleRow label="Channel separation" hint="Transcribe stereo channels independently" checked={value.channel_separation} onChange={v => set('channel_separation', v)} />
             </div>
-            {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1"> */}
-            {/* <ToggleRow label="Timestamps" hint="Include segment-level start/end times" checked={value.timestamps} onChange={v => set('timestamps', v)} /> */}
-            {/* <ToggleRow label="Word offsets" hint="Include per-word timing data" checked={value.word_time_offsets} onChange={v => set('word_time_offsets', v)} /> */}
-            {/* <ToggleRow label="Diarization" hint="Identify and label individual speakers" checked={value.diarization} onChange={v => set('diarization', v)} /> */}
-            {/* <ToggleRow label="Profanity filter" hint="Censor profanity in output text" checked={value.profanity_filter} onChange={v => set('profanity_filter', v)} /> */}
-            {/* </div> */}
         </div>
     )
 }

@@ -1,5 +1,3 @@
-export const API = '/api'
-
 export const inputCls = [
     'w-full px-3 py-2 rounded-lg text-sm text-gray-900',
     'bg-white border border-gray-200',
@@ -8,13 +6,3 @@ export const inputCls = [
 ].join(' ')
 
 export const selectCls = inputCls + ' cursor-pointer'
-
-export type AsrConfig = {
-    language: string
-    channel_separation: boolean
-}
-
-export const defaultAsrConfig: AsrConfig = {
-    language: 'en-US',
-    channel_separation: false,
-}
