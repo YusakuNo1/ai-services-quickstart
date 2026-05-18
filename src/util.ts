@@ -19,7 +19,7 @@ if (!ZOOM_API_KEY || !ZOOM_API_SECRET) {
 export const generateJWT = () => {
     const now = Math.round(Date.now() / 1000)
     const iat = now - 30
-    const exp = iat + 60 * 60 * 2
+    const exp = iat + 60 * 60 * 24 * 7
     const oHeader = { alg: 'HS256', typ: 'JWT' }
     const oPayload = {
         iss: ZOOM_API_KEY,
@@ -29,8 +29,11 @@ export const generateJWT = () => {
     const sHeader = JSON.stringify(oHeader)
     const sPayload = JSON.stringify(oPayload)
     const API_JWT = KJUR.jws.JWS.sign('HS256', sHeader, sPayload, ZOOM_API_SECRET)
+    console.log(API_JWT)
     return API_JWT
+
 }
+generateJWT()
 
 export function getEnvAwsCredentials(): AwsCredentials | undefined {
     if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) return undefined

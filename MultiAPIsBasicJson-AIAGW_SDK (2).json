@@ -1,0 +1,3458 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "AIAGW_SDK",
+    "description": "AIAGW_SDK",
+    "termsOfService": "https://zoom.us/docs/en-us/zoom_api_license_and_tou.html",
+    "contact": {
+      "name": "Zoom Developers",
+      "url": "https://developer.zoom.us/"
+    },
+    "version": "2.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.zoom.us/v2"
+    }
+  ],
+  "paths": {
+    "/aiservices/interpreter/jobs": {
+      "get": {
+        "tags": [
+          "Interpreter"
+        ],
+        "summary": "List Batch Interpreter Jobs",
+        "description": "Retrieves a paginated list of batch interpretation jobs for the authenticated tenant.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "listBatchInterpretJobs",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "description": "This field filters jobs by processing state. Omit to return jobs in all states.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "QUEUED",
+              "enum": [
+                "QUEUED",
+                "PROCESSING",
+                "SUCCEEDED",
+                "PARTIAL",
+                "FAILED",
+                "CANCELED"
+              ]
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "The maximum number of jobs to return per page.",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "example": 50,
+              "default": 50
+            }
+          },
+          {
+            "name": "next_page_token",
+            "in": "query",
+            "description": "The pagination token from the previous response's `next_page_token` field.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "eyJqb2JfaWQiOiJqb2JfYWJjMTIzIn0"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Jobs listed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "jobs"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "jobs": {
+                      "maxItems": 100,
+                      "type": "array",
+                      "description": "The list of batch interpretation jobs.",
+                      "items": {
+                        "required": [
+                          "job_id",
+                          "state",
+                          "submitted_at"
+                        ],
+                        "type": "object",
+                        "properties": {
+                          "job_id": {
+                            "type": "string",
+                            "description": "The job identifier.",
+                            "example": "job_abc123"
+                          },
+                          "state": {
+                            "type": "string",
+                            "description": "The overall job processing state.",
+                            "example": "PROCESSING",
+                            "enum": [
+                              "QUEUED",
+                              "PROCESSING",
+                              "SUCCEEDED",
+                              "PARTIAL",
+                              "FAILED",
+                              "CANCELED"
+                            ]
+                          },
+                          "submitted_at": {
+                            "type": "string",
+                            "description": "The job submission timestamp.",
+                            "format": "date-time",
+                            "example": "2026-01-05T18:34:12Z"
+                          },
+                          "input": {
+                            "type": "object",
+                            "properties": {
+                              "mode": {
+                                "type": "string",
+                                "description": "The input mode specifying how files are provided.",
+                                "example": "PREFIX",
+                                "enum": [
+                                  "SINGLE",
+                                  "PREFIX",
+                                  "MANIFEST"
+                                ]
+                              },
+                              "source": {
+                                "type": "string",
+                                "description": "The storage provider where input files are located.",
+                                "example": "S3",
+                                "enum": [
+                                  "S3"
+                                ]
+                              },
+                              "uri": {
+                                "type": "string",
+                                "description": "The URI path to input files or manifest.",
+                                "example": "s3://acme-bucket/text/"
+                              }
+                            },
+                            "description": "The input configuration."
+                          },
+                          "output": {
+                            "type": "object",
+                            "properties": {
+                              "destination": {
+                                "type": "string",
+                                "description": "The storage provider for output results.",
+                                "example": "S3",
+                                "enum": [
+                                  "S3"
+                                ]
+                              },
+                              "uri": {
+                                "type": "string",
+                                "description": "The URI path where interpretation results will be written.",
+                                "example": "s3://acme-bucket/interpreted/"
+                              },
+                              "layout": {
+                                "type": "string",
+                                "description": "The output file organization pattern.",
+                                "example": "PREFIX",
+                                "enum": [
+                                  "ADJACENT",
+                                  "PREFIX"
+                                ]
+                              }
+                            },
+                            "description": "The output configuration."
+                          },
+                          "config": {
+                            "type": "object",
+                            "properties": {
+                              "source_language": {
+                                "type": "string",
+                                "description": "The source language ISO locale.",
+                                "example": "en-US"
+                              },
+                              "target_languages": {
+                                "type": "array",
+                                "description": "The target language ISO locales.",
+                                "example": [
+                                  "es-ES",
+                                  "fr-FR"
+                                ],
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "domain": {
+                                "type": "string",
+                                "description": "The domain hint used for interpretation.",
+                                "example": "general"
+                              },
+                              "formality": {
+                                "type": "string",
+                                "description": "The formality level used for translation output.",
+                                "example": "formal"
+                              },
+                              "glossary_id": {
+                                "type": "string",
+                                "description": "The custom glossary ID used.",
+                                "example": "glossary_abc123"
+                              }
+                            },
+                            "description": "The interpretation configuration."
+                          },
+                          "summary": {
+                            "type": "object",
+                            "properties": {
+                              "total_files": {
+                                "type": "integer",
+                                "description": "The total number of files in the job.",
+                                "example": 2487
+                              },
+                              "queued": {
+                                "type": "integer",
+                                "description": "The number of files waiting in the queue.",
+                                "example": 0
+                              },
+                              "processing": {
+                                "type": "integer",
+                                "description": "The number of files currently being processed.",
+                                "example": 23
+                              },
+                              "succeeded": {
+                                "type": "integer",
+                                "description": "The number of successfully processed files.",
+                                "example": 2450
+                              },
+                              "failed": {
+                                "type": "integer",
+                                "description": "The number of files that failed processing.",
+                                "example": 14
+                              },
+                              "skipped": {
+                                "type": "integer",
+                                "description": "The number of files skipped due to filters or errors.",
+                                "example": 0
+                              },
+                              "canceled": {
+                                "type": "integer",
+                                "description": "The number of files canceled by user request.",
+                                "example": 0
+                              }
+                            },
+                            "description": "The job progress summary."
+                          },
+                          "error": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "description": "The error code indicating the failure reason.",
+                                "example": "INVALID_CREDENTIALS"
+                              },
+                              "message": {
+                                "type": "string",
+                                "description": "The human-readable error message.",
+                                "example": "AWS credentials expired"
+                              },
+                              "details": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "string"
+                                },
+                                "description": "Additional error context and details."
+                              }
+                            },
+                            "description": "Job-level error (only when state=FAILED).",
+                            "nullable": true
+                          }
+                        }
+                      }
+                    },
+                    "next_page_token": {
+                      "type": "string",
+                      "description": "The pagination token for fetching next page of results. Empty if no more results.",
+                      "example": "eyJqb2JfaWQiOiJqb2JfZGVmNDU2In0"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  \n\n "
+          },
+          "403": {
+            "description": "**HTTP Status Code:** `403` <br>\n Forbidden  \n\n "
+          },
+          "404": {
+            "description": "**HTTP Status Code:** `404` <br>\n Not Found  \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {
+          "x-permissions": []
+        }
+      },
+      "post": {
+        "tags": [
+          "Interpreter"
+        ],
+        "summary": "Submit Batch Interpreter Job",
+        "description": "Submits a batch text interpretation job for asynchronous processing.\n\nSupports three input modes: single file (mode inferred when uri points to single file), prefix/container enumeration (with optional filters), or explicit manifest (list of URIs).\n\nMaximum of 1000 files per manifest.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "submitBatchInterpret",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "config",
+                  "input",
+                  "output"
+                ],
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "required": [
+                      "source"
+                    ],
+                    "type": "object",
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "description": "The input processing mode. Optional - can be inferred: 'MANIFEST' if manifest array provided, 'SINGLE' if URI points to single file, 'PREFIX' if URI is directory/prefix.",
+                        "example": "PREFIX",
+                        "enum": [
+                          "SINGLE",
+                          "PREFIX",
+                          "MANIFEST"
+                        ]
+                      },
+                      "source": {
+                        "type": "string",
+                        "description": "The storage provider.",
+                        "example": "S3",
+                        "enum": [
+                          "S3"
+                        ]
+                      },
+                      "uri": {
+                        "type": "string",
+                        "description": "The S3 URI for a single file or prefix/container. Required for single and prefix modes.",
+                        "format": "uri",
+                        "example": "s3://acme-bucket/text/2025/11/"
+                      },
+                      "manifest": {
+                        "maxItems": 1000,
+                        "minItems": 1,
+                        "type": "array",
+                        "description": "The explicit list of file URIs for manifest mode. Each URI can include SAS tokens or signed URLs. Required when mode is 'MANIFEST'. Maximum 1000 files per batch job.",
+                        "example": [
+                          "https://acct.blob.core.windows.net/text/a1.txt?sv=...sig=...",
+                          "https://acct.blob.core.windows.net/text/a2.txt?sv=...sig=..."
+                        ],
+                        "items": {
+                          "type": "string",
+                          "format": "uri"
+                        }
+                      },
+                      "filters": {
+                        "type": "object",
+                        "properties": {
+                          "include_globs": {
+                            "maxItems": 10,
+                            "type": "array",
+                            "description": "This field includes only files that match the glob patterns. Supports wildcards: * (any chars), ** (recursive), ? (single char). Applied first.",
+                            "example": [
+                              "**/*.txt",
+                              "**/*.json"
+                            ],
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "exclude_globs": {
+                            "maxItems": 10,
+                            "type": "array",
+                            "description": "The exclude files that match the glob patterns. Applied after include_globs.",
+                            "example": [
+                              "**/tmp/**",
+                              "*_draft.*"
+                            ],
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "description": "File filtering options for prefix mode. Use glob patterns to include/exclude files from processing."
+                      },
+                      "auth": {
+                        "type": "object",
+                        "properties": {
+                          "aws": {
+                            "required": [
+                              "access_key_id",
+                              "secret_access_key",
+                              "session_token"
+                            ],
+                            "type": "object",
+                            "properties": {
+                              "access_key_id": {
+                                "type": "string",
+                                "description": "The AWS access key ID.",
+                                "example": ""
+                              },
+                              "secret_access_key": {
+                                "type": "string",
+                                "description": "The AWS secret access key.",
+                                "example": ""
+                              },
+                              "session_token": {
+                                "type": "string",
+                                "description": "The AWS session token for temporary credentials (recommended for security).",
+                                "example": ""
+                              }
+                            },
+                            "description": "The AWS credentials for S3 access. Required when source is 's3' and URIs are not pre-signed. Use session tokens for enhanced security."
+                          }
+                        },
+                        "description": "The authentication credentials for the input source."
+                      }
+                    },
+                    "description": "The input source configuration. Either 'uri' (for single/prefix modes) or 'manifest' (for manifest mode) must be provided."
+                  },
+                  "output": {
+                    "required": [
+                      "destination",
+                      "uri"
+                    ],
+                    "type": "object",
+                    "properties": {
+                      "destination": {
+                        "type": "string",
+                        "description": "The output storage provider.",
+                        "example": "S3",
+                        "enum": [
+                          "S3"
+                        ]
+                      },
+                      "uri": {
+                        "type": "string",
+                        "description": "The output base URI for interpretation results.",
+                        "format": "uri",
+                        "example": "s3://acme-bucket/interpreted/2025/11/"
+                      },
+                      "layout": {
+                        "type": "string",
+                        "description": "The output file layout strategy. 'ADJACENT': place output next to input file (same directory). 'PREFIX': use output uri as base directory.",
+                        "example": "ADJACENT",
+                        "enum": [
+                          "ADJACENT",
+                          "PREFIX"
+                        ]
+                      },
+                      "auth": {
+                        "type": "object",
+                        "properties": {
+                          "aws": {
+                            "type": "object",
+                            "properties": {
+                              "access_key_id": {
+                                "type": "string",
+                                "description": "The AWS access key ID."
+                              },
+                              "secret_access_key": {
+                                "type": "string",
+                                "description": "The AWS secret access key."
+                              },
+                              "session_token": {
+                                "type": "string",
+                                "description": "The AWS session token for temporary credentials (recommended for security)."
+                              }
+                            },
+                            "description": "The AWS credentials for S3 access. Required for AWS S3 output."
+                          }
+                        },
+                        "description": "The authentication credentials for the output destination."
+                      }
+                    },
+                    "description": "The output destination configuration."
+                  },
+                  "config": {
+                    "type": "object",
+                    "properties": {
+                      "source_language": {
+                        "type": "string",
+                        "description": "Source language ISO locale (e.g., \"en-US\"). Leave empty for auto-detect.",
+                        "example": "en-US"
+                      },
+                      "target_languages": {
+                        "type": "array",
+                        "description": "Target language ISO locales to translate into.",
+                        "example": [
+                          "es-ES",
+                          "fr-FR",
+                          "de-DE"
+                        ],
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "description": "The interpretation configuration."
+                  },
+                  "reference_id": {
+                    "maxLength": 256,
+                    "type": "string",
+                    "description": "The customer-provided reference ID for tracking and correlation.",
+                    "example": "import-2025-11"
+                  },
+                  "notifications": {
+                    "required": [
+                      "webhook_url"
+                    ],
+                    "type": "object",
+                    "properties": {
+                      "webhook_url": {
+                        "type": "string",
+                        "description": "The HTTPS webhook URL for job status notifications. Will receive POST requests on job state changes.",
+                        "format": "uri",
+                        "example": "https://example.com/hooks/interpreter"
+                      },
+                      "secret": {
+                        "maxLength": 256,
+                        "type": "string",
+                        "description": "The HMAC secret for webhook signature verification. Used to sign notification payloads.",
+                        "example": "hmac-secret"
+                      },
+                      "security_type": {
+                        "type": "string",
+                        "description": "The webhook security type.",
+                        "example": "WEBHOOK_SECURITY_HMAC",
+                        "enum": [
+                          "WEBHOOK_SECURITY_HMAC",
+                          "WEBHOOK_SECURITY_JWT"
+                        ]
+                      },
+                      "audience": {
+                        "type": "string",
+                        "description": "Required when security_type is WEBHOOK_SECURITY_JWT. Used as the \"aud\" claim in the signed token.",
+                        "example": "https://example.com"
+                      }
+                    },
+                    "description": "The webhook notification settings for job status updates."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Job submitted successfully and queued for processing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "job_id",
+                    "state",
+                    "submitted_at"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "type": "string",
+                      "description": "The unique job identifier for tracking and status queries.",
+                      "example": "job_abc123"
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "The initial job state (typically 'QUEUED').",
+                      "example": "QUEUED",
+                      "enum": [
+                        "QUEUED",
+                        "PROCESSING",
+                        "SUCCEEDED",
+                        "PARTIAL",
+                        "FAILED",
+                        "CANCELED"
+                      ]
+                    },
+                    "submitted_at": {
+                      "type": "string",
+                      "description": "The job submission timestamp in ISO 8601 format.",
+                      "format": "date-time",
+                      "example": "2026-01-05T18:34:12Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  Bad Request \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  Unauthorized \n\n "
+          },
+          "403": {
+            "description": "**HTTP Status Code:** `403` <br>\n Forbidden  Forbidden \n\n "
+          },
+          "404": {
+            "description": "**HTTP Status Code:** `404` <br>\n Not Found  Not Found \n\n "
+          },
+          "415": {
+            "description": "**HTTP Status Code:** `415` <br>\n Unsupported Media Type  Unsupported Media Type \n\n "
+          },
+          "422": {
+            "description": "**HTTP Status Code:** `422` <br>\n Unprocessable Entity  Unprocessable Entity \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  Internal Server Error \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {
+          "x-permissions": []
+        }
+      }
+    },
+    "/aiservices/interpreter/jobs/{jobId}": {
+      "get": {
+        "tags": [
+          "Interpreter"
+        ],
+        "summary": "Get Batch Interpreter Job Status",
+        "description": "Retrieves job-level summary and configuration details for a batch interpretation job.\n\nReturns overall job state, progress statistics, and the interpretation configuration used.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "getBatchInterpretJobStatus",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "The unique identifier for the batch interpretation job.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "job_abc123"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "job_id",
+                    "state",
+                    "submitted_at",
+                    "summary"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "type": "string",
+                      "description": "The job identifier.",
+                      "example": "job_abc123"
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "The overall job processing state. PARTIAL indicates some files succeeded while others failed.",
+                      "example": "PARTIAL",
+                      "enum": [
+                        "QUEUED",
+                        "PROCESSING",
+                        "SUCCEEDED",
+                        "PARTIAL",
+                        "FAILED",
+                        "CANCELED"
+                      ]
+                    },
+                    "submitted_at": {
+                      "type": "string",
+                      "description": "The job submission timestamp in ISO 8601 format.",
+                      "format": "date-time",
+                      "example": "2026-01-05T18:34:12Z"
+                    },
+                    "input": {
+                      "type": "object",
+                      "properties": {
+                        "mode": {
+                          "type": "string",
+                          "description": "The input mode specifying how files are provided.",
+                          "example": "PREFIX",
+                          "enum": [
+                            "SINGLE",
+                            "PREFIX",
+                            "MANIFEST"
+                          ]
+                        },
+                        "source": {
+                          "type": "string",
+                          "description": "The storage provider where input files are located.",
+                          "example": "S3",
+                          "enum": [
+                            "S3"
+                          ]
+                        },
+                        "uri": {
+                          "type": "string",
+                          "description": "The URI path to input files or manifest.",
+                          "example": "s3://acme-bucket/text/2025/11/"
+                        }
+                      },
+                      "description": "The input configuration."
+                    },
+                    "output": {
+                      "type": "object",
+                      "properties": {
+                        "destination": {
+                          "type": "string",
+                          "description": "The storage provider for output results.",
+                          "example": "S3",
+                          "enum": [
+                            "S3"
+                          ]
+                        },
+                        "uri": {
+                          "type": "string",
+                          "description": "The URI path where interpretation results are written.",
+                          "example": "s3://acme-bucket/interpreted/2025/11/"
+                        },
+                        "layout": {
+                          "type": "string",
+                          "description": "The output file organization pattern.",
+                          "example": "PREFIX",
+                          "enum": [
+                            "ADJACENT",
+                            "PREFIX"
+                          ]
+                        }
+                      },
+                      "description": "The output configuration."
+                    },
+                    "config": {
+                      "type": "object",
+                      "properties": {
+                        "source_language": {
+                          "type": "string",
+                          "description": "The source language ISO locale.",
+                          "example": "en-US"
+                        },
+                        "target_languages": {
+                          "type": "array",
+                          "description": "The target language ISO locales.",
+                          "example": [
+                            "es-ES",
+                            "fr-FR",
+                            "de-DE"
+                          ],
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "domain": {
+                          "type": "string",
+                          "description": "The domain hint used for interpretation.",
+                          "example": "general"
+                        },
+                        "formality": {
+                          "type": "string",
+                          "description": "The formality level used for translation output.",
+                          "example": "formal"
+                        },
+                        "glossary_id": {
+                          "type": "string",
+                          "description": "The custom glossary ID used.",
+                          "example": "glossary_abc123"
+                        }
+                      },
+                      "description": "The interpretation configuration."
+                    },
+                    "summary": {
+                      "required": [
+                        "failed",
+                        "processing",
+                        "queued",
+                        "skipped",
+                        "succeeded",
+                        "total_files"
+                      ],
+                      "type": "object",
+                      "properties": {
+                        "total_files": {
+                          "type": "integer",
+                          "description": "The total number of files in job.",
+                          "example": 2487
+                        },
+                        "queued": {
+                          "type": "integer",
+                          "description": "The files waiting in the queue.",
+                          "example": 0
+                        },
+                        "processing": {
+                          "type": "integer",
+                          "description": "The files currently being processed.",
+                          "example": 23
+                        },
+                        "succeeded": {
+                          "type": "integer",
+                          "description": "The successfully processed files.",
+                          "example": 2450
+                        },
+                        "failed": {
+                          "type": "integer",
+                          "description": "The files that failed processing.",
+                          "example": 14
+                        },
+                        "skipped": {
+                          "type": "integer",
+                          "description": "The files that are skipped due to filters or errors.",
+                          "example": 0
+                        },
+                        "canceled": {
+                          "type": "integer",
+                          "description": "The files canceled by user request.",
+                          "example": 0
+                        }
+                      },
+                      "description": "The aggregated job progress statistics."
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "The error code indicating the failure reason.",
+                          "example": "INVALID_CREDENTIALS"
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "The human-readable error message.",
+                          "example": "AWS credentials expired"
+                        },
+                        "details": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "description": "Additional error context and details."
+                        }
+                      },
+                      "description": "Job-level error (only when state=FAILED).",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  \n\n "
+          },
+          "403": {
+            "description": "**HTTP Status Code:** `403` <br>\n Forbidden  \n\n "
+          },
+          "404": {
+            "description": "**HTTP Status Code:** `404` <br>\n Not Found  \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {
+          "x-permissions": []
+        }
+      },
+      "delete": {
+        "tags": [
+          "Interpreter"
+        ],
+        "summary": "Cancel Batch Interpreter Job",
+        "description": "Cancels a batch interpretation job.\n\nOnly jobs in QUEUED or PROCESSING state can be canceled.\n\nSuccessfully canceled jobs transition to CANCELED state. Jobs that are already SUCCEEDED, FAILED, or CANCELED cannot be canceled.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "cancelBatchInterpretJob",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "The unique identifier for the batch interpretation job.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "job_abc123"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Cancels a batch interpretation job.\n\nOnly jobs in QUEUED or PROCESSING state can be canceled."
+        },
+        "responses": {
+          "204": {
+            "description": "Job canceled successfully. No content returned."
+          },
+          "404": {
+            "description": "**HTTP Status Code:** `404` <br>\n Not Found  Not Found \n\n "
+          },
+          "409": {
+            "description": "**HTTP Status Code:** `409` <br>\n Conflict  Conflict \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  Internal Server Error \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {
+          "x-permissions": []
+        }
+      }
+    },
+    "/aiservices/interpreter/translate": {
+      "post": {
+        "tags": [
+          "Interpreter"
+        ],
+        "summary": "Interpret (FAST mode)",
+        "description": "\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "createTranslate",
+        "requestBody": {
+          "description": "Submits text and interpretation configuration for synchronous translation.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "config",
+                  "text"
+                ],
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "The text to interpret/translate. Max size is 4K characters.",
+                    "example": "Hello and welcome to the meeting."
+                  },
+                  "config": {
+                    "type": "object",
+                    "properties": {
+                      "source_language": {
+                        "type": "string",
+                        "description": "The source language ISO locale (e.g., \"en-US\"). Leave empty for auto-detect. Supported languages: English (en), Chinese (Simplified) (zh), Japanese (ja), Spanish (es), French (fr), German (de), Portuguese (pt), Italian (it), Arabic (ar)",
+                        "example": "en-US"
+                      },
+                      "target_languages": {
+                        "type": "array",
+                        "description": "The target language ISO locales to translate into.",
+                        "example": [
+                          "es-ES",
+                          "fr-FR",
+                          "de-DE"
+                        ],
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "description": "Interpretation configuration options."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interpretation completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "request_id",
+                    "result"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "request_id": {
+                      "type": "string",
+                      "description": "The unique request identifier.",
+                      "example": "req_abc123"
+                    },
+                    "result": {
+                      "required": [
+                        "translations"
+                      ],
+                      "type": "object",
+                      "properties": {
+                        "translations": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "description": "The map of the target language code to the translated text.",
+                          "example": {
+                            "es-ES": "Hola y bienvenido a la reunión.",
+                            "fr-FR": "Bonjour et bienvenue à la réunion.",
+                            "de-DE": "Hallo und willkommen beim Meeting."
+                          }
+                        }
+                      },
+                      "description": "The translation results keyed by target language code."
+                    },
+                    "model": {
+                      "type": "string",
+                      "description": "The interpretation model identifier used.",
+                      "example": "zoom-interpreter-v1"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  Bad Request \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  Unauthorized \n\n "
+          },
+          "403": {
+            "description": "**HTTP Status Code:** `403` <br>\n Forbidden  Forbidden \n\n "
+          },
+          "422": {
+            "description": "**HTTP Status Code:** `422` <br>\n Unprocessable Entity  Unprocessable Entity \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  Internal Server Error \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {
+          "x-permissions": []
+        }
+      }
+    },
+    "/aiservices/scribe/jobs": {
+      "get": {
+        "tags": [
+          "Scribe"
+        ],
+        "summary": "List Batch Jobs",
+        "description": "Retrieves a paginated list of batch transcription jobs for the authenticated tenant.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "listBatchJobs",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "description": "This field filters jobs by processing state. Omit to return jobs in all states.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "QUEUED",
+              "enum": [
+                "QUEUED",
+                "PROCESSING",
+                "SUCCEEDED",
+                "PARTIAL",
+                "FAILED",
+                "CANCELED"
+              ]
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "The maximum number of jobs to return per page.",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "example": 50,
+              "default": 50
+            }
+          },
+          {
+            "name": "next_page_token",
+            "in": "query",
+            "description": "The pagination token from the previous response's `next_page_token`field.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "eyJqb2JfaWQiOiJqb2JfYWJjMTIzIn0"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Jobs listed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "jobs"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "jobs": {
+                      "maxItems": 100,
+                      "type": "array",
+                      "description": "The list of batch jobs.",
+                      "items": {
+                        "required": [
+                          "job_id",
+                          "state",
+                          "submitted_at"
+                        ],
+                        "type": "object",
+                        "properties": {
+                          "job_id": {
+                            "type": "string",
+                            "description": "The job identifier.",
+                            "example": "job_abc123"
+                          },
+                          "state": {
+                            "type": "string",
+                            "description": "The overall job processing state.",
+                            "example": "PROCESSING",
+                            "enum": [
+                              "QUEUED",
+                              "PROCESSING",
+                              "SUCCEEDED",
+                              "PARTIAL",
+                              "FAILED",
+                              "CANCELED"
+                            ]
+                          },
+                          "submitted_at": {
+                            "type": "string",
+                            "description": "The job submission timestamp.",
+                            "format": "date-time",
+                            "example": "2026-01-05T18:34:12Z"
+                          },
+                          "input": {
+                            "type": "object",
+                            "properties": {
+                              "mode": {
+                                "type": "string",
+                                "description": "The input mode specifying how files are provided.",
+                                "example": "INPUT_PREFIX",
+                                "enum": [
+                                  "SINGLE",
+                                  "INPUT_PREFIX",
+                                  "MANIFEST"
+                                ]
+                              },
+                              "source": {
+                                "type": "string",
+                                "description": "The storage provider where input files are located.",
+                                "example": "S3",
+                                "enum": [
+                                  "S3"
+                                ]
+                              },
+                              "uri": {
+                                "type": "string",
+                                "description": "The URI path to input files or manifest.",
+                                "example": "s3://acme-bucket/audio/"
+                              }
+                            },
+                            "description": "The input configuration."
+                          },
+                          "output": {
+                            "type": "object",
+                            "properties": {
+                              "destination": {
+                                "type": "string",
+                                "description": "The storage provider for output transcripts.",
+                                "example": "S3",
+                                "enum": [
+                                  "S3"
+                                ]
+                              },
+                              "uri": {
+                                "type": "string",
+                                "description": "The URI path where transcripts will be written.",
+                                "example": "s3://acme-bucket/transcripts/"
+                              },
+                              "layout": {
+                                "type": "string",
+                                "description": "The output file organization pattern.",
+                                "example": "PREFIX",
+                                "enum": [
+                                  "ADJACENT",
+                                  "PREFIX"
+                                ]
+                              }
+                            },
+                            "description": "The output configuration."
+                          },
+                          "config": {
+                            "type": "object",
+                            "properties": {
+                              "language": {
+                                "type": "string",
+                                "description": "The language code. See following page for details: https://developers.zoom.us/docs/api/references/abbreviations/",
+                                "example": "en-US"
+                              },
+                              "timestamps": {
+                                "type": "boolean",
+                                "description": "The include segment-level timestamps.",
+                                "example": true,
+                                "default": true
+                              },
+                              "word_time_offsets": {
+                                "type": "boolean",
+                                "description": "The include word-level timestamps.",
+                                "example": false,
+                                "default": false
+                              },
+                              "channel_separation": {
+                                "type": "boolean",
+                                "description": "Whether to transcribe stereo channels separately.",
+                                "example": false,
+                                "default": false
+                              },
+                              "diarization": {
+                                "type": "boolean",
+                                "description": "Whether to enable stretch or premium feature for speaker diarization.",
+                                "example": false
+                              },
+                              "profanity_filter": {
+                                "type": "boolean",
+                                "description": "Whether to enable profanity filtering.",
+                                "example": false
+                              },
+                              "output_format": {
+                                "type": "string",
+                                "description": "The output format (default json). Reserved for future (srt/vtt).",
+                                "example": "json"
+                              }
+                            },
+                            "description": "The ASR configuration."
+                          },
+                          "summary": {
+                            "type": "object",
+                            "properties": {
+                              "total_files": {
+                                "type": "integer",
+                                "description": "The total number of files in the job.",
+                                "example": 2487
+                              },
+                              "queued": {
+                                "type": "integer",
+                                "description": "The number of files waiting in the queue.",
+                                "example": 0
+                              },
+                              "processing": {
+                                "type": "integer",
+                                "description": "The number of files currently being processed.",
+                                "example": 23
+                              },
+                              "succeeded": {
+                                "type": "integer",
+                                "description": "The number of successfully processed files.",
+                                "example": 2450
+                              },
+                              "failed": {
+                                "type": "integer",
+                                "description": "The number of files that failed processing.",
+                                "example": 14
+                              },
+                              "skipped": {
+                                "type": "integer",
+                                "description": "The number of files skipped due to filters or errors.",
+                                "example": 0
+                              },
+                              "canceled": {
+                                "type": "integer",
+                                "description": "The number of files canceled by user request.",
+                                "example": 0
+                              }
+                            },
+                            "description": "The job progress summary."
+                          },
+                          "error": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "description": "The error code indicating the failure reason.",
+                                "example": "INVALID_CREDENTIALS"
+                              },
+                              "message": {
+                                "type": "string",
+                                "description": "The human-readable error message.",
+                                "example": "AWS credentials expired"
+                              },
+                              "details": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "string"
+                                },
+                                "description": "Additional error context and details."
+                              }
+                            },
+                            "description": "Job-level error (only when state=FAILED).",
+                            "nullable": true
+                          }
+                        }
+                      }
+                    },
+                    "next_page_token": {
+                      "type": "string",
+                      "description": "The pagination token for fetching next page of results. Empty if no more results.",
+                      "example": "eyJqb2JfaWQiOiJqb2JfZGVmNDU2In0"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  \n\n "
+          },
+          "403": {
+            "description": "**HTTP Status Code:** `403` <br>\n Forbidden  \n\n "
+          },
+          "404": {
+            "description": "**HTTP Status Code:** `404` <br>\n Not Found  \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {}
+      },
+      "post": {
+        "tags": [
+          "Scribe"
+        ],
+        "summary": "Submit Batch Scribe Job",
+        "description": "Submits a batch transcription job for asynchronous processing. \n\nSupports three input modes: single file (mode inferred when uri points to single file), prefix/container enumeration (with optional filters), or explicit manifest (list of URIs). \n\nMaximum of 1000 files per manifest.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "submitBatchAsr",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "config",
+                  "input",
+                  "output"
+                ],
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "required": [
+                      "source"
+                    ],
+                    "type": "object",
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "description": "The input processing mode. Optional - can be inferred: 'SINGLE' if uri points to single file, 'PREFIX' if uri is directory/prefix, 'MANIFEST' if manifest array provided.",
+                        "example": "PREFIX",
+                        "enum": [
+                          "SINGLE",
+                          "PREFIX",
+                          "MANIFEST"
+                        ]
+                      },
+                      "source": {
+                        "type": "string",
+                        "description": "The storage provider.",
+                        "example": "S3",
+                        "enum": [
+                          "S3"
+                        ]
+                      },
+                      "uri": {
+                        "type": "string",
+                        "description": "The S3 URI Blob URL for single file or prefix/container. Required for single and prefix modes.",
+                        "format": "uri",
+                        "example": "s3://acme-bucket/audio/2025/11/"
+                      },
+                      "manifest": {
+                        "maxItems": 1000,
+                        "minItems": 1,
+                        "type": "array",
+                        "description": "The explicit list of file URIs for manifest mode. Each URI can include SAS tokens or signed URLs. Required when mode is 'manifest'. Maximum 1000 files per batch job.",
+                        "example": [
+                          "https://acct.blob.core.windows.net/audio/a1.mp3?sv=...sig=...",
+                          "https://acct.blob.core.windows.net/audio/a2.wav?sv=...sig=..."
+                        ],
+                        "items": {
+                          "type": "string",
+                          "format": "uri"
+                        }
+                      },
+                      "filters": {
+                        "type": "object",
+                        "properties": {
+                          "include_globs": {
+                            "maxItems": 10,
+                            "type": "array",
+                            "description": "The include only files that match the glob patterns. Supports wildcards: * (any chars), ** (recursive), ? (single char). Applied first.",
+                            "example": [
+                              "**/*.wav",
+                              "**/*.mp3"
+                            ],
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "exclude_globs": {
+                            "maxItems": 10,
+                            "type": "array",
+                            "description": "The exclude files that match the glob patterns. Applied after include_globs.",
+                            "example": [
+                              "**/tmp/**",
+                              "*_draft.*"
+                            ],
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "description": "The file filtering options for prefix mode. Use glob patterns to include/exclude files from processing."
+                      },
+                      "auth": {
+                        "type": "object",
+                        "properties": {
+                          "aws": {
+                            "required": [
+                              "access_key_id",
+                              "secret_access_key",
+                              "session_token"
+                            ],
+                            "type": "object",
+                            "properties": {
+                              "access_key_id": {
+                                "type": "string",
+                                "description": "The AWS access key ID.",
+                                "example": "AKIAIOSFODNN7EXAMPLE"
+                              },
+                              "secret_access_key": {
+                                "type": "string",
+                                "description": "The AWS secret access key.",
+                                "example": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+                              },
+                              "session_token": {
+                                "type": "string",
+                                "description": "The AWS session token for temporary credentials (recommended for security).",
+                                "example": "FwoGZXIvYXdzE..."
+                              }
+                            },
+                            "description": "The AWS credentials for S3 access. Required when source is 's3' and URIs are not pre-signed. Use session tokens for enhanced security."
+                          }
+                        },
+                        "description": "The authentication credentials for the input source."
+                      }
+                    },
+                    "description": "The input source configuration. Either 'uri' (for single/prefix modes) or 'manifest' (for manifest mode) must be provided."
+                  },
+                  "output": {
+                    "required": [
+                      "destination",
+                      "uri"
+                    ],
+                    "type": "object",
+                    "properties": {
+                      "destination": {
+                        "type": "string",
+                        "description": "The output storage provider.",
+                        "example": "S3",
+                        "enum": [
+                          "S3"
+                        ]
+                      },
+                      "uri": {
+                        "type": "string",
+                        "description": "The output base URI for a single transcript file or a path for multiple transcript files.",
+                        "format": "uri",
+                        "example": "s3://acme-bucket/transcripts/2025/11/"
+                      },
+                      "layout": {
+                        "type": "string",
+                        "description": "The output file layout strategy. 'SINGLE': use 'uri' for output file (single file mode). 'PREFIX': use output uri as base directory. 'ADJACENT': place output next to input file (same directory).",
+                        "example": "PREFIX",
+                        "enum": [
+                          "SINGLE",
+                          "PREFIX",
+                          "ADJACENT"
+                        ]
+                      },
+                      "auth": {
+                        "type": "object",
+                        "properties": {
+                          "aws": {
+                            "required": [
+                              "access_key_id",
+                              "secret_access_key",
+                              "session_token"
+                            ],
+                            "type": "object",
+                            "properties": {
+                              "access_key_id": {
+                                "type": "string",
+                                "description": "The AWS access key ID.",
+                                "example": "AKIAIOSFODNN7EXAMPLE"
+                              },
+                              "secret_access_key": {
+                                "type": "string",
+                                "description": "The AWS secret access key.",
+                                "example": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+                              },
+                              "session_token": {
+                                "type": "string",
+                                "description": "The AWS session token for temporary credentials (recommended for security).",
+                                "example": "FwoGZXIvYXdzE..."
+                              }
+                            },
+                            "description": "The AWS credentials for S3 access. Required when source is 's3' and URIs are not pre-signed. Use session tokens for enhanced security."
+                          }
+                        },
+                        "description": "The authentication credentials for the output destination."
+                      }
+                    },
+                    "description": "The output destination configuration."
+                  },
+                  "config": {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string",
+                        "description": "The language code. See following page for details: https://developers.zoom.us/docs/api/references/abbreviations/",
+                        "example": "en-US"
+                      },
+                      "word_time_offsets": {
+                        "type": "boolean",
+                        "description": "The include word-level timestamps.",
+                        "example": false,
+                        "default": false
+                      },
+                      "channel_separation": {
+                        "type": "boolean",
+                        "description": "Whether to transcribe stereo channels separately.",
+                        "example": false,
+                        "default": false
+                      },
+                      "diarization": {
+                        "type": "boolean",
+                        "description": "The stretch or premium feature for speaker diarization.",
+                        "example": false
+                      },
+                      "profanity_filter": {
+                        "type": "boolean",
+                        "description": "Whether to enable profanity filtering.",
+                        "example": false
+                      },
+                      "output_format": {
+                        "type": "string",
+                        "description": "The output format. The default is JSON. Reserved for future (srt/vtt).",
+                        "example": "json"
+                      },
+                      "segmentation_mode": {
+                        "type": "string",
+                        "description": "The VAD option. The default value is 'auto'. auto: use default VAD behavior, none: disable VAD segmentation.",
+                        "example": "auto",
+                        "enum": [
+                          "auto",
+                          "none"
+                        ]
+                      }
+                    },
+                    "description": "The ASR transcription configuration."
+                  },
+                  "reference_id": {
+                    "maxLength": 256,
+                    "type": "string",
+                    "description": "The customer-provided reference ID for tracking and correlation.",
+                    "example": "import-2025-11"
+                  },
+                  "notifications": {
+                    "required": [
+                      "webhook_url"
+                    ],
+                    "type": "object",
+                    "properties": {
+                      "webhook_url": {
+                        "type": "string",
+                        "description": "The HTTPS webhook URL for job status notifications. It will receive POST requests on job state changes.",
+                        "format": "uri",
+                        "example": "https://example.com/hooks/scribe"
+                      },
+                      "secret": {
+                        "maxLength": 256,
+                        "type": "string",
+                        "description": "The HMAC secret for webhook signature verification. Used to sign notification payloads.",
+                        "example": "hmac-secret"
+                      }
+                    },
+                    "description": "The webhook notification settings for job status updates."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Job submitted successfully and queued for processing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "job_id",
+                    "state",
+                    "submitted_at"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "type": "string",
+                      "description": "The unique job identifier for tracking and status queries.",
+                      "example": "job_abc123"
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "The initial job state (typically 'QUEUED').",
+                      "example": "QUEUED",
+                      "enum": [
+                        "QUEUED",
+                        "PROCESSING",
+                        "SUCCEEDED",
+                        "PARTIAL",
+                        "FAILED",
+                        "CANCELED"
+                      ]
+                    },
+                    "submitted_at": {
+                      "type": "string",
+                      "description": "The job submission timestamp in ISO 8601 format.",
+                      "format": "date-time",
+                      "example": "2026-01-05T18:34:12Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  \n\n "
+          },
+          "403": {
+            "description": "**HTTP Status Code:** `403` <br>\n Forbidden  \n\n "
+          },
+          "404": {
+            "description": "**HTTP Status Code:** `404` <br>\n Not Found  \n\n "
+          },
+          "415": {
+            "description": "**HTTP Status Code:** `415` <br>\n Unsupported Media Type  \n\n "
+          },
+          "422": {
+            "description": "**HTTP Status Code:** `422` <br>\n Unprocessable Entity  \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {}
+      }
+    },
+    "/aiservices/scribe/jobs/{jobId}": {
+      "get": {
+        "tags": [
+          "Scribe"
+        ],
+        "summary": "Get Batch Job Status",
+        "description": "Retrieves job-level summary for a batch transcription job.\n\nReturns overall job state and progress statistics. Use `GET /ai/scribe/jobs/{jobId}/files` to retrieve per-file status with pagination.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "getBatchJobStatus",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "The unique identifier for the batch transcription job.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "job_abc123"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "job_id",
+                    "state",
+                    "submitted_at",
+                    "summary"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "type": "string",
+                      "description": "The job identifier.",
+                      "example": "job_abc123"
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "The overall job processing state. PARTIAL indicates some files succeeded while others failed.",
+                      "example": "PARTIAL",
+                      "enum": [
+                        "QUEUED",
+                        "PROCESSING",
+                        "SUCCEEDED",
+                        "PARTIAL",
+                        "FAILED",
+                        "CANCELED"
+                      ]
+                    },
+                    "submitted_at": {
+                      "type": "string",
+                      "description": "The job submission timestamp in ISO 8601 format.",
+                      "format": "date-time",
+                      "example": "2026-01-05T18:34:12Z"
+                    },
+                    "summary": {
+                      "required": [
+                        "failed",
+                        "processing",
+                        "queued",
+                        "skipped",
+                        "succeeded",
+                        "total_files"
+                      ],
+                      "type": "object",
+                      "properties": {
+                        "total_files": {
+                          "type": "integer",
+                          "description": "The total number of files in job.",
+                          "example": 2487
+                        },
+                        "queued": {
+                          "type": "integer",
+                          "description": "The files waiting in the queue.",
+                          "example": 0
+                        },
+                        "processing": {
+                          "type": "integer",
+                          "description": "The files currently being processed.",
+                          "example": 23
+                        },
+                        "succeeded": {
+                          "type": "integer",
+                          "description": "The successfully processed files.",
+                          "example": 2450
+                        },
+                        "failed": {
+                          "type": "integer",
+                          "description": "The files that failed processing.",
+                          "example": 14
+                        },
+                        "skipped": {
+                          "type": "integer",
+                          "description": "The files that are skipped due to filters or errors.",
+                          "example": 0
+                        }
+                      },
+                      "description": "The aggregated job progress statistics."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  \n\n "
+          },
+          "403": {
+            "description": "**HTTP Status Code:** `403` <br>\n Forbidden  \n\n "
+          },
+          "404": {
+            "description": "**HTTP Status Code:** `404` <br>\n Not Found  \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {}
+      },
+      "delete": {
+        "tags": [
+          "Scribe"
+        ],
+        "summary": "Cancel Batch Job",
+        "description": "Cancels a batch transcription job.\n\nOnly jobs in QUEUED or PROCESSING state can be canceled. \n\nSuccessfully canceled jobs  transition to CANCELED state. Jobs that are already COMPLETED, FAILED, or CANCELED cannot be canceled.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "cancelBatchJob",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "The unique identifier for the batch transcription job.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "job_abc123"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Job canceled successfully. No content returned. For details of job use get job status API. "
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  \n\n "
+          },
+          "404": {
+            "description": "**HTTP Status Code:** `404` <br>\n Not Found  \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {}
+      }
+    },
+    "/aiservices/scribe/jobs/{jobId}/files": {
+      "get": {
+        "tags": [
+          "Scribe"
+        ],
+        "summary": "List Batch Job Files",
+        "description": "Retrieves per-file processing status for a batch transcription job.\n\nUse `page_size` and `next_page_token` for pagination.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "listBatchJobFiles",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "The unique identifier for the batch transcription job.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "job_abc123"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "The maximum number of files to return per page.",
+            "required": false,
+            "schema": {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "example": 200,
+              "default": 200
+            }
+          },
+          {
+            "name": "next_page_token",
+            "in": "query",
+            "description": "The pagination token from the previous response's `next_page_token` field.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "eyJ0YXNrX2lkIjoidGFza18wMDEifQ"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job files listed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "files"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "files": {
+                      "maxItems": 10000,
+                      "type": "array",
+                      "description": "The per-file processing status results for the job.",
+                      "items": {
+                        "required": [
+                          "file_id",
+                          "input_uri",
+                          "output_uri",
+                          "state"
+                        ],
+                        "type": "object",
+                        "properties": {
+                          "file_id": {
+                            "type": "string",
+                            "description": "The unique file identifier within the job.",
+                            "example": "f_001"
+                          },
+                          "input_uri": {
+                            "type": "string",
+                            "description": "The source audio file URI.",
+                            "example": "s3://acme-bucket/audio/2025/11/call_0001.wav"
+                          },
+                          "state": {
+                            "type": "string",
+                            "description": "The current processing state of this file.",
+                            "example": "FILE_SUCCEEDED",
+                            "enum": [
+                              "FILE_QUEUED",
+                              "FILE_PROCESSING",
+                              "FILE_SUCCEEDED",
+                              "FILE_FAILED",
+                              "FILE_CANCELED",
+                              "FILE_SKIPPED"
+                            ]
+                          },
+                          "output_uri": {
+                            "type": "string",
+                            "description": "The transcript output URI. Null if file failed or not yet processed.",
+                            "example": "s3://acme-bucket/transcripts/2025/11/call_0001.json"
+                          },
+                          "duration_sec": {
+                            "type": "number",
+                            "description": "The audio duration in seconds (if successfully analyzed).",
+                            "example": 3520.2
+                          },
+                          "error": {
+                            "required": [
+                              "code",
+                              "message"
+                            ],
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "description": "The error code indicating the failure reason.",
+                                "example": "UNSUPPORTED_MEDIA"
+                              },
+                              "message": {
+                                "type": "string",
+                                "description": "The human-readable error description.",
+                                "example": "OGG not enabled for MVP"
+                              }
+                            },
+                            "description": "The error details (only present when state=FAILED).",
+                            "nullable": true
+                          }
+                        }
+                      }
+                    },
+                    "next_page_token": {
+                      "type": "string",
+                      "description": "The pagination token for fetching the next page of results. Empty if no more results.",
+                      "example": "eyJ0YXNrX2lkIjoidGFza18wMDIifQ"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  \n\n "
+          },
+          "403": {
+            "description": "**HTTP Status Code:** `403` <br>\n Forbidden  \n\n "
+          },
+          "404": {
+            "description": "**HTTP Status Code:** `404` <br>\n Not Found  \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {}
+      }
+    },
+    "/aiservices/scribe/transcribe": {
+      "post": {
+        "tags": [
+          "Scribe"
+        ],
+        "summary": "Scribe (Synchronous)",
+        "description": "Uploads a single audio file and receive transcript inline. Synchronous operation response returns immediately after the transcription completes.\n\nMaximum file size: 100MB. Maximum duration: 2 hours.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "createFastAsr",
+        "requestBody": {
+          "description": "Uploads audio files with ASR configuration for synchronous transcription.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "config",
+                  "file"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "description": "The audio file to transcribe. Supported formats: wav, mp3, m4a, flac, ogg, webm, mp4, mov. Max size: 100MB. Max duration: 2 hours.",
+                    "format": "binary",
+                    "example": "Vm0wd2QyUXlVWGxWV0d4WFlURndVRlpzWkZOWFZsbDNXa2M1V0Zac2JETlhhMUpUVmpGS2MySkVUbGhoTWsweFZtcEtTMUl5U2tWVWJHaG9UVlZ3VlZadGNFdFRNVTVJVm10a1dHSkdjRTlaVjNSR1pVWmFkR05GWkZwV01VcEpWbTEwVjFWdFNsWlhiR2hYWWxob2VsUlVSbUZrUjA1R1drWlNUbUpGY0VwV2JURXdWakZXZEZOclpGaGlSMmhoV1ZSR1lVMHhXbk5YYlhSWFRWaENTbGt3WkRSVk1rcElaSHBHVjJFeVVYZFpla3BIVmpGT2RWVnNXbWxTTW1oWFZtMTBWMlF5VW5OWGEyUllZbFZhY1ZSV1duZE5SbFowWlVkMFZXSkdjREZWVjNodlZqRktjMk5HYUZkaGEzQklWVEJhWVdSV1NuTlRiR1JUVFRBd01RPT0="
+                  },
+                  "config": {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string",
+                        "description": "Language code. See following page for details: https://developers.zoom.us/docs/api/references/abbreviations/",
+                        "example": "en-US"
+                      },
+                      "timestamps": {
+                        "type": "boolean",
+                        "description": "Include segment-level timestamps.",
+                        "example": true,
+                        "default": true
+                      },
+                      "word_time_offsets": {
+                        "type": "boolean",
+                        "description": "Include word-level timestamps.",
+                        "example": false,
+                        "default": false
+                      },
+                      "channel_separation": {
+                        "type": "boolean",
+                        "description": "Transcribe stereo channels separately.",
+                        "example": false,
+                        "default": false
+                      },
+                      "diarization": {
+                        "type": "boolean",
+                        "description": "Stretch/premium feature for speaker diarization.",
+                        "example": false
+                      },
+                      "profanity_filter": {
+                        "type": "boolean",
+                        "description": "Enable profanity filtering.",
+                        "example": false
+                      },
+                      "output_format": {
+                        "type": "string",
+                        "description": "Output format (default json). Reserved for future (srt/vtt).",
+                        "example": "json"
+                      }
+                    },
+                    "description": "ASR configuration options"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transcription completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "duration_sec",
+                    "request_id",
+                    "result"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "request_id": {
+                      "type": "string",
+                      "description": "The unique request identifier.",
+                      "example": "req_123"
+                    },
+                    "duration_sec": {
+                      "type": "number",
+                      "description": "The audio duration in seconds.",
+                      "example": 27.4
+                    },
+                    "result": {
+                      "required": [
+                        "text_display",
+                        "text_lexical"
+                      ],
+                      "type": "object",
+                      "properties": {
+                        "text_display": {
+                          "type": "string",
+                          "description": "The formatted display text with punctuation and capitalization.",
+                          "example": "Hello and welcome to the meeting..."
+                        },
+                        "text_lexical": {
+                          "type": "string",
+                          "description": "The lexical text without formatting (lowercase, no punctuation).",
+                          "example": "hello and welcome to the meeting"
+                        },
+                        "segments": {
+                          "maxItems": 10000,
+                          "type": "array",
+                          "description": "The transcript segments with timing information. Only present when timestamps=true in config.",
+                          "items": {
+                            "required": [
+                              "text"
+                            ],
+                            "type": "object",
+                            "properties": {
+                              "start": {
+                                "type": "number",
+                                "description": "The segment start time in seconds.",
+                                "example": 0
+                              },
+                              "end": {
+                                "type": "number",
+                                "description": "The segment end time in seconds.",
+                                "example": 3.24
+                              },
+                              "text": {
+                                "type": "string",
+                                "description": "The segment text.",
+                                "example": "Hello and welcome..."
+                              },
+                              "channel": {
+                                "type": "integer",
+                                "description": "The audio channel identifier for this segment.",
+                                "format": "int32",
+                                "example": 0
+                              },
+                              "speaker": {
+                                "type": "string",
+                                "description": "The speaker tag (e.g., 'speaker_1', 'speaker_2'). Only present when diarization=true in config.",
+                                "example": "speaker_1"
+                              },
+                              "words": {
+                                "maxItems": 100,
+                                "type": "array",
+                                "description": "The word-level data with timing. Only present when `word_time_offsets=true` in config.",
+                                "items": {
+                                  "required": [
+                                    "word"
+                                  ],
+                                  "type": "object",
+                                  "properties": {
+                                    "word": {
+                                      "type": "string",
+                                      "description": "The word text.",
+                                      "example": "Hello"
+                                    },
+                                    "start": {
+                                      "type": "number",
+                                      "description": "The word start time in seconds.",
+                                      "example": 0
+                                    },
+                                    "end": {
+                                      "type": "number",
+                                      "description": "The word end time in seconds.",
+                                      "example": 0.2
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "description": "Transcription result object containing text and optional timing or speaker data."
+                    },
+                    "model": {
+                      "type": "string",
+                      "description": "The ASR model identifier for transcription.",
+                      "example": "zoom-asr-en-v1"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  \n\n "
+          },
+          "403": {
+            "description": "**HTTP Status Code:** `403` <br>\n Forbidden  \n\n "
+          },
+          "404": {
+            "description": "**HTTP Status Code:** `404` <br>\n Not Found  \n\n "
+          },
+          "413": {
+            "description": "**HTTP Status Code:** `413` <br>\n Payload Too Large  \n\n "
+          },
+          "415": {
+            "description": "**HTTP Status Code:** `415` <br>\n Unsupported Media Type  \n\n "
+          },
+          "422": {
+            "description": "**HTTP Status Code:** `422` <br>\n Unprocessable Entity  \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {}
+      }
+    },
+    "/aiservices/summarizer/jobs": {
+      "get": {
+        "tags": [
+          "Summarizer"
+        ],
+        "summary": "List Batch Summary Jobs",
+        "description": "Retrieves a paginated list of batch interpretation jobs for the authenticated tenant.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "listBatchSummaryJobs",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "description": "This field filters jobs by processing state. Omit to return jobs in all states.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "QUEUED",
+              "enum": [
+                "QUEUED",
+                "PROCESSING",
+                "SUCCEEDED",
+                "PARTIAL",
+                "FAILED",
+                "CANCELED"
+              ]
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "The maximum number of jobs to return per page.",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "example": 50,
+              "default": 50
+            }
+          },
+          {
+            "name": "next_page_token",
+            "in": "query",
+            "description": "The pagination token from the previous response's `next_page_token` field.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "eyJqb2JfaWQiOiJqb2JfYWJjMTIzIn0"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Jobs listed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "jobs"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "jobs": {
+                      "maxItems": 100,
+                      "type": "array",
+                      "description": "The list of batch summarization jobs.",
+                      "items": {
+                        "required": [
+                          "job_id",
+                          "state",
+                          "submitted_at"
+                        ],
+                        "type": "object",
+                        "properties": {
+                          "job_id": {
+                            "type": "string",
+                            "description": "The job identifier.",
+                            "example": "job_abc123"
+                          },
+                          "state": {
+                            "type": "string",
+                            "description": "The overall job processing state.",
+                            "example": "PROCESSING",
+                            "enum": [
+                              "QUEUED",
+                              "PROCESSING",
+                              "SUCCEEDED",
+                              "PARTIAL",
+                              "FAILED",
+                              "CANCELED"
+                            ]
+                          },
+                          "submitted_at": {
+                            "type": "string",
+                            "description": "The job submission timestamp.",
+                            "format": "date-time",
+                            "example": "2026-01-05T18:34:12Z"
+                          },
+                          "input": {
+                            "type": "object",
+                            "properties": {
+                              "mode": {
+                                "type": "string",
+                                "description": "The input mode specifying how files are provided.",
+                                "example": "PREFIX",
+                                "enum": [
+                                  "SINGLE",
+                                  "PREFIX",
+                                  "MANIFEST"
+                                ]
+                              },
+                              "source": {
+                                "type": "string",
+                                "description": "The storage provider where input files are located.",
+                                "example": "S3",
+                                "enum": [
+                                  "S3"
+                                ]
+                              },
+                              "uri": {
+                                "type": "string",
+                                "description": "The URI path to input files or manifest.",
+                                "example": "s3://acme-bucket/transcripts/"
+                              }
+                            },
+                            "description": "The input configuration."
+                          },
+                          "output": {
+                            "type": "object",
+                            "properties": {
+                              "destination": {
+                                "type": "string",
+                                "description": "The storage provider for output results.",
+                                "example": "S3",
+                                "enum": [
+                                  "S3"
+                                ]
+                              },
+                              "uri": {
+                                "type": "string",
+                                "description": "The URI path where summarization results will be written.",
+                                "example": "s3://acme-bucket/summaries/"
+                              },
+                              "layout": {
+                                "type": "string",
+                                "description": "The output file organization pattern.",
+                                "example": "PREFIX",
+                                "enum": [
+                                  "ADJACENT",
+                                  "PREFIX"
+                                ]
+                              }
+                            },
+                            "description": "The output configuration."
+                          },
+                          "config": {
+                            "type": "object",
+                            "properties": {
+                              "content_type": {
+                                "type": "string",
+                                "description": "The input transcript format. Empty for auto-detection. Accepted values are `text/plain`, `text/vtt`, `text/srt`, and `application/x-subrip`.",
+                                "example": "text/vtt"
+                              },
+                              "task": {
+                                "type": "string",
+                                "description": "The summarization task type. Defaults to `full_summary` if not specified. Accepted values are `full_summary`, `recap`, `action_items`, and `summary`.",
+                                "example": "full_summary",
+                                "enum": [
+                                  "full_summary",
+                                  "recap",
+                                  "action_items",
+                                  "summary"
+                                ]
+                              },
+                              "language": {
+                                "type": "string",
+                                "description": "The language of the input content.",
+                                "example": "en-US"
+                              },
+                              "output_format": {
+                                "type": "string",
+                                "description": "The output format. Defaults to `structured_json` if not specified. Accepted values are `structured_json` and `text`.",
+                                "example": "structured_json",
+                                "enum": [
+                                  "structured_json",
+                                  "text"
+                                ]
+                              }
+                            },
+                            "description": "The summarization configuration."
+                          },
+                          "summary": {
+                            "type": "object",
+                            "properties": {
+                              "total_files": {
+                                "type": "integer",
+                                "description": "The total number of files in the job.",
+                                "example": 2487
+                              },
+                              "queued": {
+                                "type": "integer",
+                                "description": "The number of files waiting in the queue.",
+                                "example": 0
+                              },
+                              "processing": {
+                                "type": "integer",
+                                "description": "The number of files currently being processed.",
+                                "example": 23
+                              },
+                              "succeeded": {
+                                "type": "integer",
+                                "description": "The number of successfully processed files.",
+                                "example": 2450
+                              },
+                              "failed": {
+                                "type": "integer",
+                                "description": "The number of files that failed processing.",
+                                "example": 14
+                              },
+                              "skipped": {
+                                "type": "integer",
+                                "description": "The number of files skipped due to filters or errors.",
+                                "example": 0
+                              },
+                              "canceled": {
+                                "type": "integer",
+                                "description": "The number of files canceled by user request.",
+                                "example": 0
+                              }
+                            },
+                            "description": "The job progress summary."
+                          },
+                          "error": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "description": "The error code indicating the failure reason.",
+                                "example": "INVALID_CREDENTIALS"
+                              },
+                              "message": {
+                                "type": "string",
+                                "description": "The human-readable error message.",
+                                "example": "AWS credentials expired"
+                              },
+                              "details": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "string"
+                                },
+                                "description": "Additional error context and details."
+                              }
+                            },
+                            "description": "The job-level error. Only present when the state is `FAILED`.",
+                            "nullable": true
+                          }
+                        }
+                      }
+                    },
+                    "next_page_token": {
+                      "type": "string",
+                      "description": "The pagination token for fetching the next page of results. Empty if no more results are available.",
+                      "example": "eyJqb2JfaWQiOiJqb2JfZGVmNDU2In0"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  \n\n "
+          },
+          "403": {
+            "description": "**HTTP Status Code:** `403` <br>\n Forbidden  \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {
+          "x-permissions": []
+        }
+      },
+      "post": {
+        "tags": [
+          "Summarizer"
+        ],
+        "summary": "Submit Batch Summary Job",
+        "description": "Submits a batch summary job for asynchronous processing. \n\nSupports three input modes: single file (mode inferred when URI points to single file), prefix/container enumeration (with optional filters), or explicit manifest (list of URIs). \n\nMaximum of 1000 files per manifest.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "submitBatchSummary",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "config",
+                  "input",
+                  "output"
+                ],
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "required": [
+                      "source"
+                    ],
+                    "type": "object",
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "description": "The input processing mode. Optional - can be inferred: 'SINGLE' if uri points to single file, 'PREFIX' if uri is directory/prefix, 'MANIFEST' if manifest array provided.",
+                        "example": "PREFIX",
+                        "enum": [
+                          "SINGLE",
+                          "PREFIX",
+                          "MANIFEST"
+                        ]
+                      },
+                      "source": {
+                        "type": "string",
+                        "description": "The storage provider.",
+                        "example": "S3",
+                        "enum": [
+                          "S3"
+                        ]
+                      },
+                      "uri": {
+                        "type": "string",
+                        "description": "The S3 URI Blob URL for single file or prefix/container. Required for single and prefix modes.",
+                        "format": "uri",
+                        "example": "s3://acme-bucket/audio/2025/11/"
+                      },
+                      "manifest": {
+                        "maxItems": 1000,
+                        "minItems": 1,
+                        "type": "array",
+                        "description": "The explicit list of file URIs for manifest mode. Each URI can include SAS tokens or signed URLs. Required when mode is 'manifest'. Maximum 1000 files per batch job.",
+                        "example": [
+                          "https://acct.blob.core.windows.net/audio/a1.mp3?sv=...sig=...",
+                          "https://acct.blob.core.windows.net/audio/a2.wav?sv=...sig=..."
+                        ],
+                        "items": {
+                          "type": "string",
+                          "format": "uri"
+                        }
+                      },
+                      "filters": {
+                        "type": "object",
+                        "properties": {
+                          "include_globs": {
+                            "maxItems": 10,
+                            "type": "array",
+                            "description": "The include only files that match the glob patterns. Supports wildcards: * (any chars), ** (recursive), ? (single char). Applied first.",
+                            "example": [
+                              "**/*.wav",
+                              "**/*.mp3"
+                            ],
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "exclude_globs": {
+                            "maxItems": 10,
+                            "type": "array",
+                            "description": "The exclude files that match the glob patterns. Applied after include_globs.",
+                            "example": [
+                              "**/tmp/**",
+                              "*_draft.*"
+                            ],
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "description": "The file filtering options for prefix mode. Use glob patterns to include/exclude files from processing."
+                      },
+                      "auth": {
+                        "type": "object",
+                        "properties": {
+                          "aws": {
+                            "required": [
+                              "access_key_id",
+                              "secret_access_key",
+                              "session_token"
+                            ],
+                            "type": "object",
+                            "properties": {
+                              "access_key_id": {
+                                "type": "string",
+                                "description": "The AWS access key ID.",
+                                "example": "your-aws-access-key-id"
+                              },
+                              "secret_access_key": {
+                                "type": "string",
+                                "description": "The AWS secret access key.",
+                                "example": "your-aws-secret-access-key"
+                              },
+                              "session_token": {
+                                "type": "string",
+                                "description": "The AWS session token for temporary credentials (recommended for security).",
+                                "example": "your-aws-session-token"
+                              }
+                            },
+                            "description": "The AWS credentials for S3 access. Required when source is 's3' and URIs are not pre-signed. Use session tokens for enhanced security."
+                          }
+                        },
+                        "description": "The authentication credentials for the input source."
+                      }
+                    },
+                    "description": "The input source configuration. Either 'uri' (for single/prefix modes) or 'manifest' (for manifest mode) must be provided."
+                  },
+                  "output": {
+                    "required": [
+                      "destination",
+                      "uri"
+                    ],
+                    "type": "object",
+                    "properties": {
+                      "destination": {
+                        "type": "string",
+                        "description": "The output storage provider.",
+                        "example": "S3",
+                        "enum": [
+                          "S3"
+                        ]
+                      },
+                      "uri": {
+                        "type": "string",
+                        "description": "The output base URI for a single transcript file or a path for multiple transcript files.",
+                        "format": "uri",
+                        "example": "s3://acme-bucket/transcripts/2025/11/"
+                      },
+                      "layout": {
+                        "type": "string",
+                        "description": "The output file layout strategy. 'SINGLE': use 'uri' for output file (single file mode). 'PREFIX': use output uri as base directory. 'ADJACENT': place output next to input file (same directory).",
+                        "example": "PREFIX",
+                        "enum": [
+                          "SINGLE",
+                          "PREFIX",
+                          "ADJACENT"
+                        ]
+                      },
+                      "auth": {
+                        "type": "object",
+                        "properties": {
+                          "aws": {
+                            "type": "object",
+                            "properties": {
+                              "access_key_id": {
+                                "type": "string",
+                                "description": "The AWS access key ID.",
+                                "example": "your-aws-access-key-id"
+                              },
+                              "secret_access_key": {
+                                "type": "string",
+                                "description": "The AWS secret access key.",
+                                "example": "your-aws-secret-access-key"
+                              },
+                              "session_token": {
+                                "type": "string",
+                                "description": "The AWS session token for temporary credentials (recommended for security).",
+                                "example": "your-aws-session-token"
+                              }
+                            },
+                            "description": "The AWS credentials for S3 access. Required for AWS S3 output."
+                          }
+                        },
+                        "description": "The authentication credentials for the output destination."
+                      }
+                    },
+                    "description": "The output destination configuration."
+                  },
+                  "config": {
+                    "type": "object",
+                    "description": "Summarizer configuration options."
+                  },
+                  "reference_id": {
+                    "maxLength": 256,
+                    "type": "string",
+                    "description": "The customer-provided reference ID for tracking and correlation.",
+                    "example": "import-2025-11"
+                  },
+                  "notifications": {
+                    "required": [
+                      "webhook_url"
+                    ],
+                    "type": "object",
+                    "properties": {
+                      "webhook_url": {
+                        "type": "string",
+                        "description": "The HTTPS webhook URL for job status notifications. It will receive POST requests on job state changes.",
+                        "format": "uri",
+                        "example": "https://example.com/hooks/scribe"
+                      },
+                      "secret": {
+                        "maxLength": 256,
+                        "type": "string",
+                        "description": "The HMAC secret for webhook signature verification. Used to sign notification payloads.",
+                        "example": "hmac-secret"
+                      }
+                    },
+                    "description": "The webhook notification settings for job status updates."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Job submitted successfully and queued for processing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "job_id",
+                    "state",
+                    "submitted_at"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "type": "string",
+                      "description": "The unique job identifier for tracking and status queries.",
+                      "example": "job_abc123"
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "The initial job state (typically 'QUEUED').",
+                      "example": "QUEUED",
+                      "enum": [
+                        "QUEUED",
+                        "PROCESSING",
+                        "SUCCEEDED",
+                        "PARTIAL",
+                        "FAILED",
+                        "CANCELED"
+                      ]
+                    },
+                    "submitted_at": {
+                      "type": "string",
+                      "description": "The job submission timestamp in ISO 8601 format.",
+                      "format": "date-time",
+                      "example": "2026-01-05T18:34:12Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  \n\n "
+          },
+          "403": {
+            "description": "**HTTP Status Code:** `403` <br>\n Forbidden  \n\n "
+          },
+          "404": {
+            "description": "**HTTP Status Code:** `404` <br>\n Not Found  \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {
+          "x-permissions": []
+        }
+      }
+    },
+    "/aiservices/summarizer/jobs/{jobId}": {
+      "get": {
+        "tags": [
+          "Summarizer"
+        ],
+        "summary": "Get Batch Summary Job Status",
+        "description": "Retrieves job-level summary and configuration details for a batch summary job.\n\nReturns the overall job state, progress statistics, and the summarization configuration used.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "getBatchSummaryJobStatus",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "The unique identifier for the batch summary job.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "job_abc123"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job status retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "job_id",
+                    "state",
+                    "submitted_at",
+                    "summary"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "type": "string",
+                      "description": "The job identifier.",
+                      "example": "job_abc123"
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "The overall job processing state. `PARTIAL` indicates some files succeeded while others failed.",
+                      "example": "PARTIAL",
+                      "enum": [
+                        "QUEUED",
+                        "PROCESSING",
+                        "SUCCEEDED",
+                        "PARTIAL",
+                        "FAILED",
+                        "CANCELED"
+                      ]
+                    },
+                    "submitted_at": {
+                      "type": "string",
+                      "description": "The job submission timestamp in ISO 8601 format.",
+                      "format": "date-time",
+                      "example": "2026-01-05T18:34:12Z"
+                    },
+                    "input": {
+                      "type": "object",
+                      "properties": {
+                        "mode": {
+                          "type": "string",
+                          "description": "The input mode specifying how files are provided.",
+                          "example": "PREFIX",
+                          "enum": [
+                            "SINGLE",
+                            "PREFIX",
+                            "MANIFEST"
+                          ]
+                        },
+                        "source": {
+                          "type": "string",
+                          "description": "The storage provider where input files are located.",
+                          "example": "S3",
+                          "enum": [
+                            "S3"
+                          ]
+                        },
+                        "uri": {
+                          "type": "string",
+                          "description": "The URI path to input files or manifest.",
+                          "example": "s3://acme-bucket/transcripts/2025/11/"
+                        }
+                      },
+                      "description": "The input configuration."
+                    },
+                    "output": {
+                      "type": "object",
+                      "properties": {
+                        "destination": {
+                          "type": "string",
+                          "description": "The storage provider for output results.",
+                          "example": "S3",
+                          "enum": [
+                            "S3"
+                          ]
+                        },
+                        "uri": {
+                          "type": "string",
+                          "description": "The URI path where summarization results are written.",
+                          "example": "s3://acme-bucket/summaries/2025/11/"
+                        },
+                        "layout": {
+                          "type": "string",
+                          "description": "The output file organization pattern.",
+                          "example": "PREFIX",
+                          "enum": [
+                            "ADJACENT",
+                            "PREFIX"
+                          ]
+                        }
+                      },
+                      "description": "The output configuration."
+                    },
+                    "config": {
+                      "type": "object",
+                      "properties": {
+                        "content_type": {
+                          "type": "string",
+                          "description": "The input transcript format. Empty for auto-detection. Accepted values: `text/plain`, `text/vtt`, `text/srt`, and `application/x-subrip`.",
+                          "example": "text/vtt"
+                        },
+                        "task": {
+                          "type": "string",
+                          "description": "The summarization task type. Defaults to `full_summary` if not specified. Accepted values: `full_summary`, `recap`, `action_items`, and `summary`.",
+                          "example": "full_summary",
+                          "enum": [
+                            "full_summary",
+                            "recap",
+                            "action_items",
+                            "summary"
+                          ]
+                        },
+                        "language": {
+                          "type": "string",
+                          "description": "The language of the input content.",
+                          "example": "en-US"
+                        },
+                        "output_format": {
+                          "type": "string",
+                          "description": "The output format. Defaults to `structured_json` if not specified. Accepted values: `structured_json` and `text`.",
+                          "example": "structured_json",
+                          "enum": [
+                            "structured_json",
+                            "text"
+                          ]
+                        }
+                      },
+                      "description": "The summarization configuration."
+                    },
+                    "summary": {
+                      "required": [
+                        "failed",
+                        "processing",
+                        "queued",
+                        "skipped",
+                        "succeeded",
+                        "total_files"
+                      ],
+                      "type": "object",
+                      "properties": {
+                        "total_files": {
+                          "type": "integer",
+                          "description": "The total number of files in the job.",
+                          "example": 2487
+                        },
+                        "queued": {
+                          "type": "integer",
+                          "description": "The number of files waiting in the queue.",
+                          "example": 0
+                        },
+                        "processing": {
+                          "type": "integer",
+                          "description": "The number of files currently being processed.",
+                          "example": 23
+                        },
+                        "succeeded": {
+                          "type": "integer",
+                          "description": "The number of successfully processed files.",
+                          "example": 2450
+                        },
+                        "failed": {
+                          "type": "integer",
+                          "description": "The number of files that failed processing.",
+                          "example": 14
+                        },
+                        "skipped": {
+                          "type": "integer",
+                          "description": "The number of files skipped due to filters or errors.",
+                          "example": 0
+                        },
+                        "canceled": {
+                          "type": "integer",
+                          "description": "The number of files canceled by user request.",
+                          "example": 0
+                        }
+                      },
+                      "description": "The aggregated job progress statistics."
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "The error code indicating the failure reason.",
+                          "example": "INVALID_CREDENTIALS"
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "The human-readable error message.",
+                          "example": "AWS credentials expired"
+                        },
+                        "details": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "description": "Additional error context and details."
+                        }
+                      },
+                      "description": "The job-level error. Only present when `state` is `FAILED`.",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  \n\n "
+          },
+          "403": {
+            "description": "**HTTP Status Code:** `403` <br>\n Forbidden  \n\n "
+          },
+          "404": {
+            "description": "**HTTP Status Code:** `404` <br>\n Not Found  \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {
+          "x-permissions": []
+        }
+      },
+      "delete": {
+        "tags": [
+          "Summarizer"
+        ],
+        "summary": "Cancel Batch Summarizer Job",
+        "description": "Cancel a batch summarization job.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "CancelBatchSummarizerJob",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "The unique identifier for the batch summary job.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "job_abc123"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Cancels a batch summarization job.\n\nOnly jobs in `QUEUED` or `PROCESSING` state can be canceled.\n\nSuccessfully canceled jobs will be in `CANCELED` state. Jobs that are already `COMPLETED`, `FAILED`, or `CANCELED` cannot be canceled."
+        },
+        "responses": {
+          "204": {
+            "description": "Job canceled successfully. No content returned."
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  \n\n "
+          },
+          "403": {
+            "description": "**HTTP Status Code:** `403` <br>\n Forbidden  \n\n "
+          },
+          "404": {
+            "description": "**HTTP Status Code:** `404` <br>\n Not Found  \n\n "
+          },
+          "409": {
+            "description": "**HTTP Status Code:** `409` <br>\n Conflict  \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {
+          "x-permissions": []
+        }
+      }
+    },
+    "/aiservices/summarizer/summarize": {
+      "post": {
+        "tags": [
+          "Summarizer"
+        ],
+        "summary": "Summarize (FAST mode)",
+        "description": "Submit the configuration for a synchronous summary.\n\n**[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `LIGHT`",
+        "operationId": "summarize",
+        "requestBody": {
+          "description": "Submit the configuration for a synchronous summary.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "input"
+                ],
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "required": [
+                      "text"
+                    ],
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "description": "The transcript text to summarize.",
+                        "example": "Alice: Good morning everyone, let's get started.\nBob: I finished the auth module last week.\nAlice: Great. Bob, can you document the API by Friday?\nBob: Sure, I'll have that done."
+                      }
+                    },
+                    "description": "The input content to summarize."
+                  },
+                  "config": {
+                    "type": "object",
+                    "properties": {
+                      "content_type": {
+                        "type": "string",
+                        "description": "The input transcript format. Leave empty for auto-detection. Accepted values: `text/plain`, `text/vtt`, `text/srt`, and `application/x-subrip`.",
+                        "example": "text/vtt"
+                      },
+                      "task": {
+                        "type": "string",
+                        "description": "The summarization task type. Defaults to `full_summary` if not specified. Accepted values: `full_summary`, `recap`, `action_items`, and `summary`.",
+                        "example": "full_summary",
+                        "default": "full_summary",
+                        "enum": [
+                          "full_summary",
+                          "recap",
+                          "action_items",
+                          "summary"
+                        ]
+                      },
+                      "language": {
+                        "type": "string",
+                        "description": "The BCP-47 language tag of the input content. Leave empty for auto-detection.",
+                        "example": "en-US"
+                      },
+                      "output_format": {
+                        "type": "string",
+                        "description": "The output format. Defaults to `structured_json` if not specified. Accepted values: `structured_json` and `text`.",
+                        "example": "structured_json",
+                        "default": "structured_json",
+                        "enum": [
+                          "structured_json",
+                          "text"
+                        ]
+                      }
+                    },
+                    "description": "The summarization configuration options."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Summarization completed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "request_id",
+                    "result",
+                    "task"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "request_id": {
+                      "type": "string",
+                      "description": "The unique request identifier.",
+                      "example": "req_abc123"
+                    },
+                    "task": {
+                      "type": "string",
+                      "description": "The summarization task that was performed.",
+                      "example": "full_summary",
+                      "enum": [
+                        "recap",
+                        "action_items",
+                        "summary",
+                        "full_summary"
+                      ]
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "recap": {
+                          "type": "string",
+                          "description": "A brief recap of the content. Populated when `output_format` is `structured_json` and the task includes recap.",
+                          "example": "The team held a weekly sync to discuss the backend deploy and upcoming roadmap items."
+                        },
+                        "summary_text": {
+                          "type": "string",
+                          "description": "A detailed summary of the content. Populated when `output_format` is `structured_json` and the task includes summary.",
+                          "example": "The backend deployment was completed successfully with no issues. The team reviewed Q2 roadmap priorities and agreed on next steps."
+                        },
+                        "action_items": {
+                          "type": "string",
+                          "description": "The extracted action items from the content. Populated when `output_format` is `structured_json` and the task includes action items.",
+                          "example": "- Alice to finalize API documentation by Friday\n- Bob to schedule follow-up with the design team"
+                        },
+                        "text": {
+                          "type": "string",
+                          "description": "The plain text output. Populated when `output_format` is `text`.",
+                          "example": "The team discussed the successful backend deployment and upcoming Q2 priorities."
+                        }
+                      },
+                      "description": "The summarization result. The fields populated depend on the task and output format."
+                    },
+                    "model": {
+                      "type": "string",
+                      "description": "The summarization model identifier used.",
+                      "example": "zoom-summarizer-v1"
+                    },
+                    "usage": {
+                      "type": "object",
+                      "properties": {
+                        "input_units": {
+                          "type": "integer",
+                          "description": "The number of input units consumed.",
+                          "format": "int64",
+                          "example": 1024
+                        },
+                        "output_units": {
+                          "type": "integer",
+                          "description": "The number of output units produced.",
+                          "format": "int64",
+                          "example": 128
+                        },
+                        "unit_type": {
+                          "type": "string",
+                          "description": "The unit type for input and output counts. For example, `tokens` or `characters`.",
+                          "example": "tokens"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "task": {
+                              "type": "string",
+                              "description": "The task performed.",
+                              "example": "full_summary"
+                            },
+                            "content_type": {
+                              "type": "string",
+                              "description": "The detected or specified input content type.",
+                              "example": "text/vtt"
+                            }
+                          },
+                          "description": "The additional usage detail breakdown."
+                        }
+                      },
+                      "description": "The usage statistics for this request."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "**HTTP Status Code:** `400` <br>\n Bad Request  \n\n "
+          },
+          "401": {
+            "description": "**HTTP Status Code:** `401` <br>\n Unauthorized  \n\n "
+          },
+          "403": {
+            "description": "**HTTP Status Code:** `403` <br>\n Forbidden  \n\n "
+          },
+          "422": {
+            "description": "**HTTP Status Code:** `422` <br>\n Unprocessable Entity  \n\n "
+          },
+          "429": {
+            "description": "**HTTP Status Code:** `429` <br>\n Too Many Requests. For more information, see [rate limits](https://developers.zoom.us/docs/api/rate-limits/). \n\n "
+          },
+          "500": {
+            "description": "**HTTP Status Code:** `500` <br>\n Internal Server Error  \n\n "
+          }
+        },
+        "security": [
+          {
+            "openapi_oauth": [],
+            "openapi_authorization": []
+          }
+        ],
+        "x-extensions": {
+          "x-permissions": []
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "openapi_authorization": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      },
+      "openapi_oauth": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/",
+            "tokenUrl": "",
+            "refreshUrl": "",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  }
+}
